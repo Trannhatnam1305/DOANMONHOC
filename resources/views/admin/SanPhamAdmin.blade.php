@@ -52,7 +52,10 @@
                         <td>{{ $dssanpham->brand_id }}</td>
                         <td>
                             <div class="action-buttons">
-                                <button class="action-button edit-btn">✏️</button>
+                                <!--<button class="action-button edit-btn">✏️</button>-->
+                                <a href="{{ route('admin.edit-product', $dssanpham->id) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
                                 <!-- form request xóa-->
                                 <form action="{{ route('admin.sanpham.xoa', $dssanpham->id) }}" method="POST" style="display:inline;">
                                     @csrf
@@ -60,11 +63,12 @@
                                         <button class="action-button delete-btn" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?')">🗑️</button>
                                 </form>
                             </div>
+                            
                         </td>
                     </tr>
                 @endforeach
-
             </tbody>
         </table>
     </div>
+   
 @endsection
