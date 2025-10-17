@@ -148,15 +148,7 @@ class AdminController extends Controller
             'description' => 'Mô tả',
             'image' => 'Hình ảnh',
         ]);
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = time() . '_' . $file->getClientOriginalName(); // tên file duy nhất
-            $file->move(public_path('uploads/products'), $filename); // lưu file vào thư mục public/uploads/products
-
-            $imagePath = 'uploads/products/' . $filename;
-        } else {
-            $imagePath = $request->old_image ?? ''; // nếu không chọn file mới, giữ nguyên file cũ
-        }
+        
         //  CẬP NHẬT DỮ LIỆU
         DB::table('products')
             ->where('id', $id)

@@ -52,23 +52,36 @@
                         <td>{{ $dssanpham->brand_id }}</td>
                         <td>
                             <div class="action-buttons">
-                                <!--<button class="action-button edit-btn">✏️</button>-->
+                                <!--Edit sản phẩm-->
                                 <a href="{{ route('admin.edit-product', $dssanpham->id) }}" class="btn btn-primary btn-sm">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <!-- form request xóa-->
-                                <form action="{{ route('admin.sanpham.xoa', $dssanpham->id) }}" method="POST" style="display:inline;">
+                                <form action="{{ route('admin.sanpham.xoa', $dssanpham->id) }}" method="POST"
+                                    style="display:inline;">
                                     @csrf
                                     @method('DELETE')
-                                        <button class="action-button delete-btn" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?')">🗑️</button>
+                                    <button class="action-button delete-btn"
+                                        onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?')">🗑️</button>
                                 </form>
                             </div>
-                            
+
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-   
+    @if (session('success'))
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: '{{ session('success') }}',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        </script>
+    @endif
 @endsection
