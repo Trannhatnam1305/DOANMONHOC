@@ -7,6 +7,9 @@ use App\Http\Requests\AdminLoginRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\OrderItem;
+use App\Models\Product;
 
 
 class AdminController extends Controller
@@ -14,7 +17,29 @@ class AdminController extends Controller
     //
     public function LoadAdmin()
     {
-        return view('admin.HomeAdmin');
+        // Tổng người dùng
+        $totalUsers = User::count();
+
+        // Tổng số đơn hàng (đếm số order_id khác nhau trong order_items)
+        $totalOrders = DB::table('order_items')
+            ->select('order_id')
+            ->distinct()
+            ->count();
+
+        // Tổng số sản phẩm
+        $totalProducts = Product::count();
+
+        // Tổng doanh thu (tổng price * quantity)
+        $totalRevenue = OrderItem::select(DB::raw('SUM(price * quantity) as total'))->value('total');
+
+        $stats = [
+            'users' => $totalUsers,
+            'orders' => $totalOrders,
+            'products' => $totalProducts,
+            'revenue' => $totalRevenue,
+        ];
+
+        return view('admin.HomeAdmin', compact('stats'));
     }
 
     public function loginPage()
@@ -148,7 +173,7 @@ class AdminController extends Controller
             'description' => 'Mô tả',
             'image' => 'Hình ảnh',
         ]);
-        
+
         //  CẬP NHẬT DỮ LIỆU
         DB::table('products')
             ->where('id', $id)

@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WebController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ContactController;
@@ -71,3 +72,4 @@ Route::get('/middle', function () {
 Route::get('/login', [WebController::class, 'login']);
 Route::get('signup', [WebController::class, 'signup']);
 Route::post('/login', [WebController::class, 'dangNhap']);
+
