@@ -69,7 +69,11 @@ Route::get('/middle', function () {
 
 })->middleware(ResultToken::class);
 //tail -f storage/logs/laravel.log
-Route::get('/login', [WebController::class, 'login']);
-Route::get('signup', [WebController::class, 'signup']);
-Route::post('/login', [WebController::class, 'dangNhap']);
+
+
+Route::get('/login', [WebController::class, 'login'])->name('login');
+Route::post('/login', [WebController::class, 'postLogin'])->name('postLogin');
+Route::get('/signup', [WebController::class, 'signup'])->name('signup');
+Route::post('/signup', [WebController::class, 'postSignup'])->name('postSignup');
+Route::get('/logout', [WebController::class, 'logout'])->name('logout');
 

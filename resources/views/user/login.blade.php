@@ -81,12 +81,19 @@
     @if(session('status'))
         {{session('status')}}
    @endif
-    <form action="/login" method="POST">
-      @csrf
-      <input type="text" placeholder="Nhập tài khoản *" required>
-      <input type="password" placeholder="Nhập mật khẩu *" required>
-      <button type="submit" class="btn">Đăng nhập</button>
-    </form>
+   <form action="{{ route('postLogin') }}" method="POST">
+    @csrf <div class="form-group">
+        <label>Tên đăng nhập</label>
+        <input type="text" name="username" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+        <label>Mật khẩu</label>
+        <input type="password" name="password" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Đăng nhập</button>
+</form>
     <div class="register">
       Bạn chưa có tài khoản? <a href="/signup" class="dk">Đăng ký ngay</a> - <a href="/" class="tc">Quay lại</a>
     </div>

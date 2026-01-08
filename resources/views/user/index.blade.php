@@ -1,37 +1,30 @@
-@extends('layout.user_layout')
+@extends('layout.client_layout')
     @section('main')
     <div class="slider-area">
-        <div class="zigzag-bottom"></div>
-        <div id="slide-list" class="carousel carousel-fade slide" data-ride="carousel">
-
-            <div class="slide-bulletz">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <ol class="carousel-indicators slide-indicators">
-                                <li data-target="#slide-list" data-slide-to="0" class="active"></li>
-                                <li data-target="#slide-list" data-slide-to="1"></li>
-                                <li data-target="#slide-list" data-slide-to="2"></li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div id="slide-list" class="carousel carousel-fade slide" data-ride="carousel" data-interval="5000">
+            
+            <ol class="carousel-indicators">
+                @foreach($sliders as $key => $slide)
+                    <li data-target="#slide-list" data-slide-to="{{ $key }}" class="{{ $key == 0 ? 'active' : '' }}"></li>
+                @endforeach
+            </ol>
 
             <div class="carousel-inner" role="listbox">
-                <div class="item active">
-                    <div class="single-slide">
-                        <div class="slide-bg slide-one"></div>
-                        <div class="slide-text-wrapper">
-                            <div class="slide-text">
-                                <div class="container">
-                                    <div class="row">
-                                        <div class="col-md-6 col-md-offset-6">
-                                            <div class="slide-content">
-                                                <h2>We are awesome</h2>
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequuntur, dolorem, excepturi. Dolore aliquam quibusdam ut quae iure vero exercitationem ratione!</p>
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Modi ab molestiae minus reiciendis! Pariatur ab rerum, sapiente ex nostrum laudantium.</p>
-                                                <a href="" class="readmore">Learn more</a>
+                @foreach($sliders as $key => $slide)
+                    <div class="item {{ $key == 0 ? 'active' : '' }}">
+                        <div class="single-slide">
+                            <div class="slide-bg" style="background-image: url('{{ asset('img/' . $slide->image) }}');"></div>
+                            
+                            <div class="slide-text-wrapper">
+                                <div class="slide-text">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-md-6 col-md-offset-6">
+                                                <div class="slide-content">
+                                                    <h2>{{ $slide->name }}</h2>
+                                                    <p>{{ \Illuminate\Support\Str::limit($slide->description, 150) }}</p>
+                                                    <a href="{{ url('product/'.$slide->id) }}" class="readmore">Mua ngay</a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -39,52 +32,17 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="item">
-                    <div class="single-slide">
-                        <div class="slide-bg slide-two"></div>
-                        <div class="slide-text-wrapper">
-                            <div class="slide-text">
-                                <div class="container">
-                                    <div class="row">
-                                        <div class="col-md-6 col-md-offset-6">
-                                            <div class="slide-content">
-                                                <h2>We are great</h2>
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Saepe aspernatur, dolorum harum molestias tempora deserunt voluptas possimus quos eveniet, vitae voluptatem accusantium atque deleniti inventore. Enim quam placeat expedita! Quibusdam!</p>
-                                                <a href="" class="readmore">Learn more</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="single-slide">
-                        <div class="slide-bg slide-three"></div>
-                        <div class="slide-text-wrapper">
-                            <div class="slide-text">
-                                <div class="container">
-                                    <div class="row">
-                                        <div class="col-md-6 col-md-offset-6">
-                                            <div class="slide-content">
-                                                <h2>We are superb</h2>
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolores, eius?</p>
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Deleniti voluptates necessitatibus dicta recusandae quae amet nobis sapiente explicabo voluptatibus rerum nihil quas saepe, tempore error odio quam obcaecati suscipit sequi.</p>
-                                                <a href="" class="readmore">Learn more</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
 
+            <a class="left carousel-control" href="#slide-list" data-slide="prev">
+                <i class="fa fa-angle-left"></i>
+            </a>
+            <a class="right carousel-control" href="#slide-list" data-slide="next">
+                <i class="fa fa-angle-right"></i>
+            </a>
         </div>
-    </div> <!-- End slider area -->
+    </div><!-- End slider area -->
 
     <div class="promo-area">
         <div class="zigzag-bottom"></div>
