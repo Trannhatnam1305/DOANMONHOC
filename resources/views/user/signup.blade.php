@@ -78,16 +78,44 @@
   </style>
 </head>
 <body>
-  <div class="register-container">
-    <h2>Đăng ký tài khoản</h2>
-    <form>
-      <input type="text" placeholder="Nhập họ và tên *" required>
-      <input type="text" placeholder="Nhập số điện thoại *" required>
-      <input type="email" placeholder="Nhập email (không bắt buộc)">
-      <input type="password" placeholder="Nhập mật khẩu *" required>
-      <input type="password" placeholder="Nhập lại mật khẩu *" required>
-      <button type="submit" class="btn">Đăng ký</button>
-    </form>
+      <div class="register-container">
+        <h2>Đăng ký tài khoản</h2>
+          <form action="{{ route('postSignup') }}" method="POST">
+        @csrf
+
+        @if($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <div class="form-group">
+            <label>Tên đăng nhập</label>
+            <input type="text" name="username" class="form-control" value="{{ old('username') }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control" value="{{ old('email') }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Mật khẩu</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label>Xác nhận mật khẩu</label>
+            <input type="password" name="password_confirmation" class="form-control" required>
+        </div>
+
+    <button type="submit" class="btn btn-success">Đăng ký ngay</button>
+    <p>Đã có tài khoản? <a href="{{ route('login') }}">Đăng nhập</a></p>
+</form>
     <div class="login-link">
       Bạn đã có tài khoản? <a href="/login" class="dn">Đăng nhập ngay</a> - <a href="/" class="tc">Quay lại</a>
     </div>

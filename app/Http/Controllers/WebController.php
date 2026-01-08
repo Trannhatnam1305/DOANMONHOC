@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class WebController extends Controller
 {
@@ -11,34 +14,21 @@ class WebController extends Controller
     }
 
     public function index(){
-        /**
-         *Select * from products =>DB::table('products)->get()
-         *SELECT name,price =>DB::table('product)->select('name','price')->get()
-          * Select * from product where name="nva" =>DB::table('products)->where('name','=','nva')->get()
-          * Select * from products Limit 3 =->DB::table('products)->limt(3)->get()
-         * Select * from product order by date desc => DB::table('products)->orderBy('date')
-         * Select * from products where name="nva" and price=1 =>DB::table('products)->where('name','=','nva')->where('price',1)
-         * Select * from products where name="nva" or price=1 =>DB::table('products)->where('name','=','nva')->orWhere('price',1)
-         * DB::table('products)->insert([
-         *  "name"=>'nva',
-         *  "price"=>1,
-         * ""
-         * ]]);
-         * DB::table("product")->where('id',1)->update([
-         *  "name"=>'nvb',
-         *   "price"=>2
-         * ]);\
-         *  DB::table('products')->where('id',1)->delete()
-         * DB::table('products)->truncate()
-         */
-        $products_seller=DB::table('products')->where('loai',1)->limit(3)->get();
-        $products_recently_view=DB::table('products')->where('loai',2)->limit(3)->get();
-        $products_top_new=DB::table('products')->where('loai',3)->limit(3)->get();
+        // 1. Lấy dữ liệu cho Slider (Ví dụ lấy 3 sản phẩm mới nhất)
+        $sliders = DB::table('products')->orderBy('id', 'desc')->limit(3)->get();
 
-        return view("user.index",['products_seller'=>$products_seller,'products_recently_view'=>$products_recently_view,
-                        'products_top_new'=>$products_top_new
-                    ]);
+        // 2. Lấy dữ liệu theo các nhóm 'loai' của bạn
+        $products_seller = DB::table('products')->where('loai', 1)->limit(9)->get();
+        $products_recently_view = DB::table('products')->where('loai', 2)->limit(3)->get();
+        $products_top_new = DB::table('products')->where('loai', 3)->limit(3)->get();
 
+        // 3. Trả về view kèm theo tất cả các biến dữ liệu
+        return view("user.index", [
+            'sliders' => $sliders,
+            'products_seller' => $products_seller,
+            'products_recently_view' => $products_recently_view,
+            'products_top_new' => $products_top_new
+        ]);
     }
     public function shop(){
         $product=DB::table('products')->get();
@@ -48,14 +38,68 @@ class WebController extends Controller
     public function contact(){
         return view("user.contact");
     }
-    public function login(){
-        return view('user.login');
-    }
+  
     public function signup(){
         return view('user.signup');
     }
-    public function dangNhap(Request $request){
-        return back()->with('status','Đăng nhập không thành công');
+    public function login() {
+        return view('user.login'); 
+    }
+    public function postLogin(Request $request) {
+        // 1. Lấy dữ liệu và loại bỏ khoảng trắng thừa
+        $u = trim($request->username);
+        $p = $request->password;
+
+        // 2. Kiểm tra xem có lấy được data từ form không
+        if (!$u || !$p) {
+            return "Vui lòng nhập đầy đủ tài khoản và mật khẩu!";
+        }
+
+        // 3. Truy vấn chính xác vào bảng users
+        $userInDb = \App\Models\User::where('username', $u)->first();
+
+        if (!$userInDb) {
+            // Nếu vẫn báo lỗi này, hãy kiểm tra file .env xem DB_DATABASE có đúng tên không
+            return "LỖI: Không tìm thấy Username '" . $u . "' trong DB. Kiểm tra lại hoa thường!";
+        }
+
+        // 4. Kiểm tra mật khẩu
+        if (\Hash::check($p, $userInDb->password)) {
+            \Auth::login($userInDb);
+            return redirect('/')->with('status', 'Đăng nhập thành công!');
+        } else {
+            return "LỖI: Mật khẩu nhập vào không khớp với mã Hash trong DB!";
+        }
+    }
+    public function logout(Request $request) {
+        \Auth::logout();
+        return redirect('/')->with('status', 'Đã đăng xuất!');
+    }
+    public function postSignup(Request $request) {
+        // Kiểm tra dữ liệu đầu vào
+        $request->validate([
+            'username' => 'required|unique:users,username|min:3',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6|confirmed', // 'confirmed' yêu cầu có ô password_confirmation
+        ], [
+            'username.unique' => 'Tên đăng nhập này đã có người sử dụng.',
+            'email.unique' => 'Email này đã được đăng ký.',
+            'password.confirmed' => 'Mật khẩu xác nhận không khớp.',
+        ]);
+
+        // Tạo user mới
+        $user = User::create([
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password), // Mã hóa mật khẩu
+            'role' => 0, // Mặc định là người dùng bình thường
+        ]);
+
+        // Sau khi đăng ký xong, tự động đăng nhập luôn
+        Auth::login($user);
+
+        return redirect('/')->with('status', 'Đăng ký tài khoản thành công!');
     }
 
-}
+};
+

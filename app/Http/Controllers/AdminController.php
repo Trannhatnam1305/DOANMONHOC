@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AddProductRequest;
 use App\Http\Requests\AdminLoginRequest;
+use Illuminate\Support\Facades\Hash; 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
@@ -49,13 +51,26 @@ class AdminController extends Controller
 
     public function login(AdminLoginRequest $request)
     {
+        // 1. Tìm user theo username trước
+        $user = DB::table('users')->where('username', $request->username)->first();
 
-        $user = DB::table('users')->where('username', $request->username)->where('password', $request->password)->first();
-        if (!$user)
-            return redirect()->route('admin.login')->with('status', "Username hoặc password không đúng");
-        session()->put('login', true);
-        session()->put('user_role', $user->role);
-        return redirect()->route('admin.index');
+        // 2. Kiểm tra user tồn tại và so khớp mật khẩu đã mã hóa
+        if ($user && Hash::check($request->password, $user->password)) {
+            
+            // Kiểm tra nếu là Admin (role = 1) thì mới cho vào
+            if ($user->role == 1) {
+                session()->put('login', true);
+                session()->put('user_role', $user->role);
+                session()->put('username', $user->username); // Lưu thêm tên để hiển thị nếu cần
+
+                return redirect()->route('admin.index')->with('status', "Đăng nhập Admin thành công!");
+            } else {
+                return redirect()->route('admin.login')->with('status', "Bạn không có quyền truy cập vùng này!");
+            }
+        }
+
+        // 3. Sai username hoặc password
+        return redirect()->route('admin.login')->with('status', "Username hoặc mật khẩu không đúng");
     }
 
     public function SanPham()
@@ -115,7 +130,7 @@ class AdminController extends Controller
             // file('image') là lấy file upload từ input
             $imagePath = $request->file('image')->store('uploads', 'public');
             $data['image'] = $imagePath;
-        }
+        }   
         DB::table('products')->insert($data);
 
         return redirect()->route('admin.sanpham')->with('status', 'Thêm sản phẩm thành công');
