@@ -304,7 +304,9 @@
                         </li>
 
                         <li>
-                            <a href="forms.html"><i class="fa fa-comments fa-fw"></i> Bình Luận</a>
+                            <a href="{{ route('admin.sanpham.thungrac') }}">
+                                <i class="fa fa-undo fa-fw"></i> Phục hồi
+                            </a>
                         </li>
                         <li>
                             <a href="{{ route('admin.nguoidung')}} "> <i class="fa fa-users fa-fw"></i> Người Dùng</a>

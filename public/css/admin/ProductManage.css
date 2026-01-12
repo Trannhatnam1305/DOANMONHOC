@@ -1,0 +1,66 @@
+/* public/css/admin/ProductManage.css */
+
+.product-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    background: white; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.product-table th { 
+    white-space: nowrap; /* Tiêu đề không xuống dòng */
+    background-color: #808080; 
+    color: white;
+    padding: 15px 10px;
+    text-align: center;
+}
+
+.product-table td { 
+    padding: 12px 10px; 
+    text-align: center; 
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+/* Hiển thị tên sản phẩm đẹp */
+.name-cell { 
+    white-space: nowrap; 
+    font-weight: bold; 
+    text-align: left !important; 
+    color: #333;
+}
+
+/* Giới hạn mô tả */
+.description-cell {
+    max-width: 250px;
+    text-align: left !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.img-admin { 
+    width: 60px; 
+    height: auto; 
+    border-radius: 4px; 
+    border: 1px solid #ddd;
+}
+
+.price-text { 
+    font-weight: bold; 
+    color: #333; 
+}
+
+.discount-text { 
+    color: #e74a3b; 
+    font-weight: bold; 
+}
+
+/* Pagination căn chỉnh */
+.pagination-wrapper {
+    margin-top: 25px;
+    margin-bottom: 20px;
+}

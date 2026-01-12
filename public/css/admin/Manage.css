@@ -1,131 +1,228 @@
     body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            background-color: #f4f7fa;
-            color: #333;
-        }
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        margin: 0;
+        background-color: #f4f7fa;
+        color: #333;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
+    .container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
 
-        /* --- Header Section --- */
-        .header {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+    /* --- Header Section --- */
+    .header {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 20px;
+    }
 
-        .create-button {
-            text-decoration: none;
+    .create-button {
+        text-decoration: none;
 
-            /* Thiết lập giao diện button */
-            display: inline-block; /* Quan trọng để padding và margin hoạt động */
-            padding: 10px 15px;
-            margin-bottom: 20px; /* Thêm khoảng cách với bảng bên dưới */
+        /* Thiết lập giao diện button */
+        display: inline-block;
+        /* Quan trọng để padding và margin hoạt động */
+        padding: 10px 15px;
+        margin-bottom: 20px;
+        /* Thêm khoảng cách với bảng bên dưới */
 
-            /* Màu sắc */
-            background-color: #007bff;
-            color: white;
-            border: 1px solid #007bff;
-            border-radius: 5px;
+        /* Màu sắc */
+        background-color: #007bff;
+        color: white;
+        border: 1px solid #007bff;
+        border-radius: 5px;
 
-            /* Font và hiệu ứng */
-            font-weight: bold;
-            cursor: pointer; /* Đảm bảo có con trỏ kiểu click */
-        }
+        /* Font và hiệu ứng */
+        font-weight: bold;
+        cursor: pointer;
+        /* Đảm bảo có con trỏ kiểu click */
+    }
 
-        .create-button:hover {
-            background-color: #0056b3;
-            color: white;
-        }
+    .create-button:hover {
+        background-color: #0056b3;
+        color: white;
+    }
 
-        .create-button .icon {
-            font-weight: bold;
-            font-size: 18px;
-        }
+    .create-button .icon {
+        font-weight: bold;
+        font-size: 18px;
+    }
 
-        /* --- Table Styling --- */
-        .product-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
+    /* --- Table Styling --- */
+    .product-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
 
-        .product-table th, .product-table td {
-            padding: 15px;
-            border-bottom: 1px solid #e0e0e0;
-            vertical-align: middle;
-        }
+    .product-table th,
+    .product-table td {
+        padding: 15px;
+        border-bottom: 1px solid #e0e0e0;
+        vertical-align: middle;
+    }
 
-        .product-table thead {
-            background-color: #8e8e8e;
-            color: white;
-        }
+    .product-table thead {
+        background-color: #8e8e8e;
+        color: white;
+    }
 
-        .product-table th {
-            font-weight: 600;
-            color: white;
-            font-size: 14px;
-        }
+    .product-table th {
+        font-weight: 600;
+        color: white;
+        font-size: 14px;
+    }
 
-        .product-table tbody tr:nth-child(odd) {
-            background-color: #fdfdfd;
-        }
+    .product-table tbody tr:nth-child(odd) {
+        background-color: #fdfdfd;
+    }
 
-        .product-table tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+    .product-table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
 
-        .product-table tbody tr:hover {
-            background-color: #f1f1f1;
-        }
+    .product-table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
 
-        /* --- Table Content Styling --- */
-        .product-image {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
+    /* --- Table Content Styling --- */
+    .product-image {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
 
-        .product-name {
-            font-weight: 500;
-        }
+    .product-name {
+        font-weight: 500;
+    }
 
-        /* --- Action Buttons --- */
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
+    /* --- Action Buttons --- */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
 
-        .action-button {
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            color: white;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.3s ease;
-        }
+    .action-button {
+        border: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        color: white;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.3s ease;
+    }
 
-        .action-button:hover {
-            opacity: 0.8;
-        }
+    .action-button:hover {
+        opacity: 0.8;
+    }
 
-        .edit-btn {
-            background-color: #007bff;
-        }
+    .edit-btn {
+        background-color: #007bff;
+    }
 
-        .delete-btn {
-            background-color: #dc3545;
-        }
+    .delete-btn {
+        background-color: #dc3545;
+    }
+
+
+    
+    /* Container chính bao quanh cả 2 phần */
+.header-actions {
+    display: flex;
+    justify-content: space-between; /* Đẩy Tạo mới sang trái, Tìm kiếm sang phải */
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 10px 0;
+}
+
+/* Nút Tạo Mới */
+.btn-create {
+    text-decoration: none !important;
+    background-color: #007bff;
+    color: white !important;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.3s;
+}
+
+.btn-create:hover {
+    background-color: #0056b3;
+}
+
+/* Thanh Tìm Kiếm */
+.search-box {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #007bff; 
+    border-radius: 6px;
+    overflow: hidden;
+    min-width: 300px;
+}
+
+.search-box input {
+    border: none;
+    padding: 8px 15px;
+    outline: none;
+    flex-grow: 1;
+}
+
+.search-box button {
+    background: #f8f9fa;
+    border: none;
+    border-left: 1px solid #ddd;
+    padding: 8px 15px;
+    color: #333;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.search-box button:hover {
+    background: #e9ecef;
+}
+
+/* Container cho trang thùng rác */
+.header-actions-trash {
+    display: flex;
+    justify-content: flex-end; 
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+
+/* Định dạng lại nút Quay lại cho đẹp và đồng nhất */
+.btn-back {
+    text-decoration: none;
+    background: #4e73df;
+    color: white !important;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.3s;
+}
+
+.btn-back:hover {
+    background: #2e59d9;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
