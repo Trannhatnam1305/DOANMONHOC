@@ -36,8 +36,8 @@ Route::post('/addContact', [ContactController::class, 'addContact']);
 //Route Trang Chủ Admin + Kiểm Tra Login Bằng Middleware
 Route::get('/admin',[AdminController::class,'LoadAdmin'])->name('admin.index')->middleware(IsLogin::class);
 //Route Trang Login Admin
-Route::get('/admin/login',[AdminController::class,'loginPage'])->name('admin.login');
-Route::post("/admin/login",[AdminController::class,'login']);
+//Route::get('/admin/login',[AdminController::class,'loginPage'])->name('admin.login');
+//Route::post("/admin/login",[AdminController::class,'login']);
 //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Sản Phẩm
 Route::get('/admin/sanpham', [AdminController::class, 'SanPham'])->name('admin.sanpham');
 //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Nhà Cung Cấp
@@ -54,7 +54,15 @@ Route::delete('/admin/sanpham/xoa/{id}', [AdminController::class, 'XoaSanPham'])
 //Route Trang sửa sản phẩm Admin 
 Route::get('/admin/Edit-product/{id}', [AdminController::class, 'editSanPham'])->name('admin.edit-product');
 Route::post('/admin/update-product/{id}', [AdminController::class, 'updateSanPham'])->name('admin.update-product');
-
+Route::get('/fix-admin', function() {
+    $admin = \App\Models\User::where('username', 'admin')->first();
+    if ($admin) {
+        $admin->password = \Hash::make('123456');
+        $admin->save();
+        return "Đã cập nhật mật khẩu Admin thành 123456 bằng code Laravel!";
+    }
+    return "Không tìm thấy user admin để sửa.";
+});
 
 
 
