@@ -34,40 +34,43 @@ Route::post('/addContact', [ContactController::class, 'addContact']);
 //--------------------------------------------Route Admin-----------------------------------------------
 
 
-    Route::get('/admin', [AdminController::class, 'LoadAdmin'])->name('admin.index')->middleware(IsLogin::class);
-    //Route Trang Login Admin
-    Route::get('/admin/login', [AdminController::class, 'loginPage'])->name('admin.login');
-    Route::post("/admin/login", [AdminController::class, 'login']);
-    
-    Route::middleware(['auth'])->prefix('admin')->group(function () {
+//Route Trang Login Admin
+Route::get('/admin/login', [AdminController::class, 'loginPage'])->name('admin.login');
+Route::post("/admin/login", [AdminController::class, 'login']);
+
+Route::middleware(['auth', 'admin.auth'])->prefix('admin')->group(function () {
+    //Router DashBoard
+    Route::get('/', [AdminController::class, 'LoadAdmin'])->name('admin.index');
     //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Sản Phẩm
-    Route::get('/admin/ sanpham', [AdminController::class, 'SanPham'])->name('admin.sanpham');
+    Route::get('/sanpham', [AdminController::class, 'SanPham'])->name('admin.sanpham');
     //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Nhà Cung Cấp
-    Route::get('/admin/nhacungcap', [AdminController::class, 'NhaCungCap'])->name('admin.nhacungcap');
+    Route::get('/nhacungcap', [AdminController::class, 'NhaCungCap'])->name('admin.nhacungcap');
     //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Loại Sản Phẩm
-    Route::get('/admin/loaisanpham', [AdminController::class, 'LoaiSanPham'])->name('admin.loaisanpham');
+    Route::get('/loaisanpham', [AdminController::class, 'LoaiSanPham'])->name('admin.loaisanpham');
     //Router SảnPhẩm Admin -> Người Dùng
-    Route::get('/admin/nguoidung', [AdminController::class, 'NguoiDung'])->name('admin.nguoidung');
+    Route::get('/nguoidung', [AdminController::class, 'NguoiDung'])->name('admin.nguoidung');
     //Router AddSanPham
-    Route::get('/admin/addsanpham', [AdminController::class, 'AddProduct'])->name('admin.addProduct');
-    Route::post('/admin/addsanpham', [AdminController::class, 'ThemSanPham']);
+    Route::get('/addsanpham', [AdminController::class, 'AddProduct'])->name('admin.addProduct');
+    Route::post('/addsanpham', [AdminController::class, 'ThemSanPham']);
     //Route Sản Phẩm Admin -> Xóa
-    Route::delete('/admin/sanpham/xoa/{id}', [AdminController::class, 'XoaSanPham'])->name('admin.sanpham.xoa');
+    Route::delete('/sanpham/xoa/{id}', [AdminController::class, 'XoaSanPham'])->name('admin.sanpham.xoa');
     // Route để vào xem trang Thùng rác
-    Route::get('/admin/sanpham/thung-rac', [AdminController::class, 'ThungRacSanPham'])->name('admin.sanpham.thungrac');
+    Route::get('/sanpham/thung-rac', [AdminController::class, 'ThungRacSanPham'])->name('admin.sanpham.thungrac');
     // Route thực hiện lệnh khôi phục
-    Route::get('/admin/sanpham/phuc-hoi/{id}', [AdminController::class, 'PhucHoiSanPham'])->name('admin.sanpham.phuc-hoi');
+    Route::get('/sanpham/phuc-hoi/{id}', [AdminController::class, 'PhucHoiSanPham'])->name('admin.sanpham.phuc-hoi');
     //Route Trang sửa sản phẩm Admin 
-    Route::get('/admin/Edit-product/{id}', [AdminController::class, 'editSanPham'])->name('admin.edit-product');
-    Route::post('/admin/update-product/{id}', [AdminController::class, 'updateSanPham'])->name('admin.update-product');
+    Route::get('/Edit-product/{id}', [AdminController::class, 'editSanPham'])->name('admin.edit-product');
+    Route::post('/update-product/{id}', [AdminController::class, 'updateSanPham'])->name('admin.update-product');
     //Route Admin -> DS Người dùng 
-    Route::get('/admin/nguoidung', [AdminController::class, 'danhSachNguoiDung'])->name('admin.nguoidung');
+    Route::get('/nguoidung', [AdminController::class, 'danhSachNguoiDung'])->name('admin.nguoidung');
     // Route Admin hiển thị form tạo mới
-    Route::get('/admin/nguoidung/create', [AdminController::class, 'createQuanTriVien'])->name('admin.user.create');
+    Route::get('/nguoidung/create', [AdminController::class, 'createQuanTriVien'])->name('admin.user.create');
     //Route xử lý lưu dữ liệu
-    Route::post('/admin/nguoidung/store', [AdminController::class, 'storeQuanTriVien'])->name('admin.user.store');
+    Route::post('/nguoidung/store', [AdminController::class, 'storeQuanTriVien'])->name('admin.user.store');
     // Route này sẽ nhận ID người dùng và trạng thái mới (0 là khóa, 1 là mở)
-    Route::get('/admin/user/status/{id}/{status}', [AdminController::class, 'doiTrangThai'])->name('admin.user.status');
+    Route::get('/user/status/{id}/{status}', [AdminController::class, 'doiTrangThai'])->name('admin.user.status');
+    // Route để khóa/mở tài khoản (truyền id người dùng cần xử lý vào)
+    Route::post('/nguoidung/toggle/{id}', [AdminController::class, 'toggleStatus'])->name('admin.toggleUser');
 });
 
 

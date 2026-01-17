@@ -46,7 +46,7 @@
                 <tbody>
                     @foreach ($sanpham as $sp)
                         <tr>
-                            <td>{{ $sp->id }}</td>
+                            <td>{{ ($sanpham->currentPage() - 1) * $sanpham->perPage() + $loop->iteration }}</td>
                             <td class="name-cell">{{ $sp->name }}</td>
                             <td class="price-text">{{ number_format($sp->price, 0, ',', '.') }}đ</td>
                             <td class="discount-text">{{ number_format($sp->discount_price, 0, ',', '.') }}đ</td>

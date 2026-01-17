@@ -16,7 +16,7 @@ use App\Models\Product;
 
 class AdminController extends Controller
 {
-    
+
     //
     public function LoadAdmin()
     {
@@ -50,41 +50,53 @@ class AdminController extends Controller
         return view('admin.loginAdmin');
     }
 
-    public function login(AdminLoginRequest $request)
+    public function login(Request $request)
     {
-        // 1. Chuẩn bị thông tin đăng nhập
-        $credentials = [
-            'username' => $request->username, // Hoặc 'email' tùy form của bạn
-            'password' => $request->password
-        ];
+        // 1. Validate dữ liệu đầu vào
+        $credentials = $request->validate([
+            'username' => 'required',
+            'password' => 'required'
+        ]);
 
-        // 2. Auth::attempt sẽ tự động:
-        // - Tìm user
-        // - Mã hóa password nhập vào để so sánh với database
-        // - Nếu đúng: Tự động tạo Session login (Auth::check() sẽ thành true)
+        // 2. Thử đăng nhập
         if (Auth::attempt($credentials)) {
 
-            // Tạo lại session ID để bảo mật (tránh tấn công Session Fixation)
             $request->session()->regenerate();
 
-            // Lấy thông tin user hiện tại
+            // Lấy thông tin user vừa đăng nhập
             $user = Auth::user();
 
-            // 3. Kiểm tra quyền Admin
-            if ($user->role >= 1) {
-                return redirect()->route('admin.index')->with('status', "Đăng nhập thành công!");
-            } else {
-                // Đăng nhập đúng pass nhưng không phải Admin -> Đăng xuất ngay lập tức
+            // --- MỚI THÊM: KIỂM TRA TRẠNG THÁI (STATUS) ---
+            // Nếu status = 0 (Bị khóa) thì đăng xuất ngay
+            if ($user->status == 0) {
                 Auth::logout();
-                return redirect()->route('admin.login')->with('status', "Bạn không có quyền truy cập!");
-            }
-    }
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
 
-    // 4. Nếu sai username hoặc password
-    return back()->withErrors([
-        'username' => 'Thông tin đăng nhập không chính xác.',
-    ]);
-}
+                return redirect()->route('admin.login')->with('error', 'Tài khoản quản trị của bạn đã bị khóa!');
+            }
+            // ----------------------------------------------
+
+            // --- KIỂM TRA QUYỀN (ROLE) ---
+            // Nếu KHÔNG PHẢI ADMIN (role < 1)
+            if ($user->role < 1) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()->route('admin.login')->with('error', 'Tài khoản của bạn không có quyền quản trị!');
+            }
+            // -----------------------------
+
+            // Nếu mọi thứ OK (Admin và Không bị khóa) -> Vào Dashboard
+            return redirect()->route('admin.index')->with('status', 'Đăng nhập thành công!');
+        }
+
+        // 3. Nếu sai username hoặc password
+        return back()->withErrors([
+            'username' => 'Thông tin đăng nhập không chính xác.',
+        ]);
+    }
 
     public function SanPham(Request $request)
     {
@@ -266,64 +278,97 @@ class AdminController extends Controller
 
         return redirect()->route('admin.sanpham')->with('status', 'Cập nhật sản phẩm thành công!');
     }
-    public function createQuanTriVien() {
-    // Sửa lại đường dẫn view theo yêu cầu của bạn: admin/create.blade.php
-    // Thêm check Auth để tránh lỗi "property on null"
-    if (Auth::check() && Auth::user()->role == 2) {
-        return view('admin.create'); 
+    public function createQuanTriVien()
+    {
+        // Sửa lại đường dẫn view theo yêu cầu của bạn: admin/create.blade.php
+        // Thêm check Auth để tránh lỗi "property on null"
+        if (Auth::check() && Auth::user()->role == 2) {
+            return view('admin.create');
+        }
+        return redirect()->route('admin.user.index')->with('error', 'Bạn không có quyền thực hiện chức năng này!');
     }
-    return redirect()->route('admin.user.index')->with('error', 'Bạn không có quyền thực hiện chức năng này!');
-}
 
-public function storeQuanTriVien(Request $request) {
-    // 1. Kiểm tra dữ liệu (Validation)
-    $request->validate([
-        'username' => 'required|unique:users,username|min:4',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|min:6',
-        'phone' => 'nullable|numeric|digits_between:10,11'
-    ], [
-        'username.unique' => 'Tên đăng nhập này đã tồn tại!',
-        'email.unique' => 'Email này đã được sử dụng!',
-        'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
-        'phone.numeric' => 'Số điện thoại chỉ được chứa chữ số.'
-    ]);
+    public function storeQuanTriVien(Request $request)
+    {
+        // 1. Kiểm tra dữ liệu (Validation)
+        $request->validate([
+            'username' => 'required|unique:users,username|min:4',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+            'phone' => 'nullable|numeric|digits_between:10,11'
+        ], [
+            'username.unique' => 'Tên đăng nhập này đã tồn tại!',
+            'email.unique' => 'Email này đã được sử dụng!',
+            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
+            'phone.numeric' => 'Số điện thoại chỉ được chứa chữ số.'
+        ]);
 
-    try {
-        $user = new \App\Models\User(); 
-        $user->username = $request->username;
-        $user->email = $request->email;
-        $user->phone = $request->phone; // Lưu số điện thoại riêng biệt
-        $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
-        $user->role = 1; // Mặc định là Quản trị viên
-        $user->save();
+        try {
+            $user = new \App\Models\User();
+            $user->username = $request->username;
+            $user->email = $request->email;
+            $user->phone = $request->phone; // Lưu số điện thoại riêng biệt
+            $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+            $user->role = 1; // Mặc định là Quản trị viên
+            $user->save();
 
-        // Sửa dòng 282 trong AdminController.php
-    return redirect()->route('admin.nguoidung')->with('success', 'Đã tạo thành công Quản trị viên!');
-        
-    } catch (\Exception $e) {
-        // Nếu MySQL bị tắt trong XAMPP, nó sẽ nhảy vào đây
-        return redirect()->back()->with('error', 'Có lỗi xảy ra khi lưu dữ liệu. Vui lòng kiểm tra lại kết nối Database!');
+            // Sửa dòng 282 trong AdminController.php
+            return redirect()->route('admin.nguoidung')->with('success', 'Đã tạo thành công Quản trị viên!');
+
+        } catch (\Exception $e) {
+            // Nếu MySQL bị tắt trong XAMPP, nó sẽ nhảy vào đây
+            return redirect()->back()->with('error', 'Có lỗi xảy ra khi lưu dữ liệu. Vui lòng kiểm tra lại kết nối Database!');
+        }
     }
-}
-public function doiTrangThai($id, $status) {
-    $user = \App\Models\User::find($id);
-    
-    if ($user) {
-        // Bảo vệ: Role 1 không được phép khóa Role 2 hoặc Role 1 khác qua URL
-        if (Auth::user()->role == 1 && $user->role >= 1) {
-            return redirect()->back()->with('error', 'Bạn không có quyền khóa tài khoản quản trị khác!');
+    public function doiTrangThai($id, $status)
+    {
+        $user = \App\Models\User::find($id);
+
+        if ($user) {
+            // Bảo vệ: Role 1 không được phép khóa Role 2 hoặc Role 1 khác qua URL
+            if (Auth::user()->role == 1 && $user->role >= 1) {
+                return redirect()->back()->with('error', 'Bạn không có quyền khóa tài khoản quản trị khác!');
+            }
+
+            $user->status = $status;
+            $user->save();
+
+            $message = ($status == 0) ? 'Đã khóa tài khoản thành công!' : 'Đã mở khóa tài khoản!';
+            return redirect()->back()->with('success', $message);
         }
 
-        $user->status = $status;
-        $user->save();
-        
-        $message = ($status == 0) ? 'Đã khóa tài khoản thành công!' : 'Đã mở khóa tài khoản!';
-        return redirect()->back()->with('success', $message);
+        return redirect()->back()->with('error', 'Không tìm thấy người dùng!');
     }
-    
-    return redirect()->back()->with('error', 'Không tìm thấy người dùng!');
-}
+    public function toggleStatus($id) // Tên function có thể khác tùy code bạn đặt
+    {
+        $user = User::find($id); // Tìm tài khoản cần khóa
+        $currentUser = Auth::user(); // Lấy thông tin Admin đang đăng nhập
+
+        // 1. Chặn không cho tự khóa chính mình
+        if ($user->id == $currentUser->id) {
+            return redirect()->back()->with('error', 'Bạn không thể tự khóa chính mình!');
+        }
+
+        // 2. Xử lý logic phân quyền Admin
+        // Nếu tài khoản bị tác động là một ADMIN (role = 1 hoặc quản trị viên)
+        if ($user->role == 1) {
+
+            // Kiểm tra: Người thực hiện có phải là "Trùm cuối" (ID = 1) không?
+            if ($currentUser->id != 1) {
+                // Nếu không phải ID 1, thì báo lỗi không đủ quyền
+                return redirect()->back()->with('error', 'Chỉ Admin cấp cao mới được quyền khóa quản trị viên khác!');
+            }
+
+            // Nếu là ID 1 thì cho phép đi tiếp xuống dưới để khóa
+        }
+
+        // --- ĐOẠN XỬ LÝ ĐỔI TRẠNG THÁI (Giữ nguyên code cũ của bạn ở dưới) ---
+        $user->status = !$user->status; // Đảo ngược trạng thái 0 <-> 1
+        $user->save();
+
+        $action = $user->status ? 'Mở khóa' : 'Khóa';
+        return redirect()->back()->with('status', "Đã $action tài khoản {$user->username} thành công!");
+    }
 }
 
 
