@@ -11,7 +11,53 @@ class WebController extends Controller
 {
     public function cart()
     {
-        return view("user.cart");
+        // 1. Giỏ hàng
+        $cart = session()->get('cart', []);
+
+        // 2. Sidebar Products (ngẫu nhiên)
+        $products_sidebar = DB::table('products')->inRandomOrder()->limit(8)->get();
+
+        // 3. You may be interested in (ngẫu nhiên)
+        $products_interested = DB::table('products')->inRandomOrder()->limit(4)->get();
+
+        // 4. [THÊM MỚI] Recent Posts - Lấy 5 sản phẩm mới nhất (theo ID giảm dần)
+        $recent_posts = DB::table('products')->orderBy('id', 'desc')->limit(5)->get();
+
+        // 5. Trả về view kèm biến $recent_posts
+        return view('user.cart', compact('cart', 'products_sidebar', 'products_interested', 'recent_posts'));
+    }
+
+    public function addToCart($id)
+    {
+        // 1. Tìm sản phẩm trong database theo ID
+        $product = DB::table('products')->find($id);
+
+        // Nếu không tìm thấy sản phẩm thì báo lỗi 404
+        if (!$product) {
+            abort(404);
+        }
+
+        // 2. Lấy giỏ hàng hiện tại từ session (nếu chưa có thì là mảng rỗng)
+        $cart = session()->get('cart', []);
+
+        // 3. Kiểm tra: Nếu sản phẩm đã có trong giỏ rồi thì tăng số lượng lên
+        if (isset($cart[$id])) {
+            $cart[$id]['quantity']++;
+        } else {
+            // 4. Nếu chưa có thì thêm mới vào mảng cart
+            $cart[$id] = [
+                "name" => $product->name,
+                "quantity" => 1,
+                "price" => $product->discount_price > 0 ? $product->discount_price : $product->price, // Ưu tiên lấy giá giảm
+                "image" => $product->image
+            ];
+        }
+
+        // 5. Lưu lại giỏ hàng mới vào Session
+        session()->put('cart', $cart);
+
+        // 6. Chuyển hướng người dùng đến trang Giỏ hàng để xem kết quả
+        return redirect()->route('cart')->with('success', 'Đã thêm sản phẩm vào giỏ hàng!');
     }
 
     public function index()
@@ -119,7 +165,18 @@ class WebController extends Controller
 
         return redirect('/')->with('status', 'Đăng ký tài khoản thành công!');
     }
+    public function deleteCart($id)
+    {
+        $cart = session()->get('cart');
 
+        // Kiểm tra xem sản phẩm có trong giỏ không thì mới xóa
+        if (isset($cart[$id])) {
+            unset($cart[$id]); // Hàm unset dùng để xóa phần tử khỏi mảng
+            session()->put('cart', $cart); // Lưu lại giỏ hàng mới
+        }
+
+        return redirect()->back()->with('success', 'Đã xóa sản phẩm thành công!');
+    }
 }
 ;
 

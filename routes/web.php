@@ -17,8 +17,6 @@ use App\Http\Middleware\IsLogin;
 
 //Router Trang Chủ
 Route::get('/', [WebController::class, 'index']);
-//Route Trang Cart
-Route::get('/cart', [WebController::class, 'cart']);
 //Route Trang Checkout
 Route::get('/checkout', [WebController::class, 'checkout']);
 //Route Trang Shop
@@ -28,7 +26,12 @@ Route::get('/single-product', [WebController::class, 'singleproduct']);
 //Route Trang Contact
 Route::get('/contact', [WebController::class, 'contact']);
 Route::post('/addContact', [ContactController::class, 'addContact']);
-
+// Route xem trang giỏ hàng
+Route::get('/cart', [WebController::class, 'cart'])->name('cart');
+// Route thêm sản phẩm vào giỏ (nhận ID sản phẩm)
+Route::get('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
+// Route xóa sản phẩm khỏi giỏ hàng
+Route::get('/delete-cart/{id}', [WebController::class, 'deleteCart'])->name('delete_cart');
 
 
 //--------------------------------------------Route Admin-----------------------------------------------
@@ -39,13 +42,24 @@ Route::get('/admin',[AdminController::class,'LoadAdmin'])->name('admin.index')->
 //Route::get('/admin/login',[AdminController::class,'loginPage'])->name('admin.login');
 //Route::post("/admin/login",[AdminController::class,'login']);
 //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Sản Phẩm
+// Route cho trang Thêm người dùng 
+Route::get('/admin/nguoidung/create', [AdminController::class, 'createQuanTriVien'])->name('admin.user.create');
+// Route để xử lý Lưu người dùng mới 
+Route::post('/admin/nguoidung/store', [AdminController::class, 'storeQuanTriVien'])->name('admin.user.store');
+// Route để Khóa/Mở khóa tài khoản 
+Route::post('/admin/nguoidung/toggle/{id}', [AdminController::class, 'toggleStatus'])->name('admin.toggleUser');
+// Route xem danh sách sản phẩm đã xóa
+Route::get('/admin/sanpham/thung-rac', [AdminController::class, 'ThungRacSanPham'])->name('admin.sanpham.thungrac');
+// Route phục hồi sản phẩm
+Route::get('/admin/sanpham/phuc-hoi/{id}', [AdminController::class, 'PhucHoiSanPham'])->name('admin.sanpham.phuc-hoi');
+//Router SảnPhẩm Admin
 Route::get('/admin/sanpham', [AdminController::class, 'SanPham'])->name('admin.sanpham');
 //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Nhà Cung Cấp
 Route::get('/admin/nhacungcap', [AdminController::class, 'NhaCungCap'])->name('admin.nhacungcap');
 //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Loại Sản Phẩm
 Route::get('/admin/loaisanpham', [AdminController::class, 'LoaiSanPham'])->name('admin.loaisanpham');
 //Router SảnPhẩm Admin -> Người Dùng
-Route::get('/admin/nguoidung', [AdminController::class, 'NguoiDung'])->name('admin.nguoidung');
+Route::get('/admin/nguoidung', [AdminController::class, 'danhSachNguoiDung'])->name('admin.nguoidung');
 //Router AddSanPham
 Route::get('/admin/addsanpham', [AdminController::class, 'AddProduct'])->name('admin.addProduct');
 Route::post('/admin/addsanpham', [AdminController::class, 'ThemSanPham']);

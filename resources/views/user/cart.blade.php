@@ -1,4 +1,5 @@
 @extends('layout.user_layout')
+<link rel="stylesheet" href="{{ asset('css/cart.css') }}">
 @section('main')
 <div class="product-big-title-area">
         <div class="container">
@@ -18,54 +19,48 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
-                    <div class="single-sidebar">
+                    <!--<div class="single-sidebar">
                         <h2 class="sidebar-title">Search Products</h2>
                         <form action="#">
                             <input type="text" placeholder="Search products...">
                             <input type="submit" value="Search">
                         </form>
-                    </div>
+                    </div> !-->
 
                     <div class="single-sidebar">
                         <h2 class="sidebar-title">Products</h2>
+                        
+                        {{-- Bắt đầu vòng lặp lấy dữ liệu từ Controller --}}
+                        @foreach($products_sidebar as $item)
                         <div class="thubmnail-recent">
-                            <img src="img/product-thumb-1.jpg" class="recent-thumb" alt="">
-                            <h2><a href="/single-product">Sony Smart TV - 2015</a></h2>
+                            {{-- Ảnh sản phẩm --}}
+                            <img src="{{ asset('uploads/' . $item->image) }}" class="recent-thumb" alt="{{ $item->name }}">
+                            
+                            {{-- Tên sản phẩm --}}
+                            <h2>
+                                <a href="{{ route('add_to_cart', $item->id) }}">
+                                    {{ $item->name }}
+                                </a>
+                            </h2>   
+                            
+                            {{-- Giá sản phẩm --}}
                             <div class="product-sidebar-price">
-                                <ins>$700.00</ins> <del>$800.00</del>
+                                <ins>{{ number_format($item->price) }} VNĐ</ins>
                             </div>
                         </div>
-                        <div class="thubmnail-recent">
-                            <img src="img/product-thumb-1.jpg" class="recent-thumb" alt="">
-                            <h2><a href="/single-product">Sony Smart TV - 2015</a></h2>
-                            <div class="product-sidebar-price">
-                                <ins>$700.00</ins> <del>$800.00</del>
-                            </div>
-                        </div>
-                        <div class="thubmnail-recent">
-                            <img src="img/product-thumb-1.jpg" class="recent-thumb" alt="">
-                            <h2><a href="/single-product">Sony Smart TV - 2015</a></h2>
-                            <div class="product-sidebar-price">
-                                <ins>$700.00</ins> <del>$800.00</del>
-                            </div>
-                        </div>
-                        <div class="thubmnail-recent">
-                            <img src="img/product-thumb-1.jpg" class="recent-thumb" alt="">
-                            <h2><a href="/single-product">Sony Smart TV - 2015</a></h2>
-                            <div class="product-sidebar-price">
-                                <ins>$700.00</ins> <del>$800.00</del>
-                            </div>
-                        </div>
+                        @endforeach
+                        {{-- Kết thúc vòng lặp --}}
                     </div>
 
                     <div class="single-sidebar">
                         <h2 class="sidebar-title">Recent Posts</h2>
                         <ul>
-                            <li><a href="#">Sony Smart TV - 2015</a></li>
-                            <li><a href="#">Sony Smart TV - 2015</a></li>
-                            <li><a href="#">Sony Smart TV - 2015</a></li>
-                            <li><a href="#">Sony Smart TV - 2015</a></li>
-                            <li><a href="#">Sony Smart TV - 2015</a></li>
+                            @foreach($recent_posts as $post)
+                                <li>
+                                    {{-- Hiển thị tên sản phẩm, click vào sẽ load lại trang hoặc sang chi tiết --}}
+                                    <a href="#">{{ $post->name }}</a>
+                                </li>
+                            @endforeach
                         </ul>
                     </div>
                 </div>
@@ -85,36 +80,66 @@
                                             <th class="product-subtotal">Total</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <tr class="cart_item">
-                                            <td class="product-remove">
-                                                <a title="Remove this item" class="remove" href="#">×</a>
-                                            </td>
+                                   <tbody>
+                                        {{-- Khởi tạo biến tổng tiền = 0 --}}
+                                        @php $total = 0; @endphp
 
-                                            <td class="product-thumbnail">
-                                                <a href="/single-product"><img width="145" height="145" alt="poster_1_up" class="shop_thumbnail" src="img/product-thumb-2.jpg"></a>
-                                            </td>
+                                        {{-- KIỂM TRA: Nếu giỏ hàng có dữ liệu --}}
+                                        @if(session('cart'))
+                                            {{-- VÒNG LẶP: Duyệt qua từng sản phẩm trong giỏ --}}
+                                            @foreach(session('cart') as $id => $details)
+                                                @php 
+                                                    // Tính thành tiền từng món (Giá x Số lượng)
+                                                    $subtotal = $details['price'] * $details['quantity']; 
+                                                    // Cộng dồn vào tổng tiền đơn hàng
+                                                    $total += $subtotal;
+                                                @endphp
 
-                                            <td class="product-name">
-                                                <a href="/single-product">Ship Your Idea</a>
-                                            </td>
+                                                <tr class="cart_item">
+                                                   {{-- Tìm dòng này --}}
+                                                    <td class="product-remove">
+                                                        <a title="Xóa sản phẩm này" class="remove" href="{{ route('delete_cart', $id) }}">×</a>
+                                                    </td>
 
-                                            <td class="product-price">
-                                                <span class="amount">£15.00</span>
-                                            </td>
+                                                    <td class="product-thumbnail">
+                                                        <a href="#">
+                                                            {{-- Hiển thị ảnh từ thư mục uploads --}}
+                                                            <img width="145" height="145" alt="{{ $details['name'] }}" class="shop_thumbnail" src="{{ asset('uploads/' . $details['image']) }}">
+                                                        </a>
+                                                    </td>
 
-                                            <td class="product-quantity">
-                                                <div class="quantity buttons_added">
-                                                    <input type="button" class="minus" value="-">
-                                                    <input type="number" size="4" class="input-text qty text" title="Qty" value="1" min="0" step="1">
-                                                    <input type="button" class="plus" value="+">
-                                                </div>
-                                            </td>
+                                                    <td class="product-name">
+                                                        <a href="#">{{ $details['name'] }}</a> 
+                                                    </td>
 
-                                            <td class="product-subtotal">
-                                                <span class="amount">£15.00</span>
-                                            </td>
-                                        </tr>
+                                                    <td class="product-price">
+                                                        <span class="amount">{{ number_format($details['price']) }} VNĐ</span> 
+                                                    </td>
+
+                                                    <td class="product-quantity">
+                                                        <div class="quantity buttons_added">
+                                                            <input type="button" class="minus" value="-">
+                                                            {{-- Hiển thị số lượng hiện tại --}}
+                                                            <input type="number" size="4" class="input-text qty text" title="Qty" value="{{ $details['quantity'] }}" min="1" step="1">
+                                                            <input type="button" class="plus" value="+">
+                                                        </div>
+                                                    </td>
+
+                                                    <td class="product-subtotal">
+                                                        <span class="amount">{{ number_format($subtotal) }} VNĐ</span> 
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            {{-- Nếu giỏ hàng trống --}}
+                                            <tr>
+                                                <td colspan="6" class="text-center" style="padding: 20px; font-weight: bold;">
+                                                    Giỏ hàng của bạn đang trống! <a href="/shop">Mua sắm ngay</a>
+                                                </td>
+                                            </tr>
+                                        @endif
+
+                                        {{-- Phần nút bấm cập nhật / thanh toán (Giữ nguyên) --}}
                                         <tr>
                                             <td class="actions" colspan="6">
                                                 <div class="coupon">
@@ -123,7 +148,8 @@
                                                     <input type="submit" value="Apply Coupon" name="apply_coupon" class="button">
                                                 </div>
                                                 <input type="submit" value="Update Cart" name="update_cart" class="button">
-                                                <input type="submit" value="Proceed to Checkout" name="proceed" class="checkout-button button alt wc-forward">
+                                                {{-- Sửa link Checkout --}}
+                                                <a href="/checkout" class="checkout-button button alt wc-forward">Thanh toán</a>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -136,28 +162,26 @@
                             <div class="cross-sells">
                                 <h2>You may be interested in...</h2>
                                 <ul class="products">
+                                    @foreach($products_interested as $item)
                                     <li class="product">
-                                        <a href="/single-product">
-                                            <img width="325" height="325" alt="T_4_front" class="attachment-shop_catalog wp-post-image" src="img/product-2.jpg">
-                                            <h3>Ship Your Idea</h3>
-                                            <span class="price"><span class="amount">£20.00</span></span>
+                                        <a href="#">
+                                            <img width="325" height="325" alt="{{ $item->name }}" class="attachment-shop_catalog wp-post-image" src="{{ asset('uploads/' . $item->image) }}">
+                                            
+                                            {{-- [CHỈNH SỬA Ở ĐÂY] Thêm style min-height để tên sản phẩm luôn cao bằng nhau (khoảng 2 dòng) --}}
+                                            <h3 style="min-height: 40px; line-height: 1.4em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                                {{ $item->name }}
+                                            </h3>
+
+                                            <span class="price"><span class="amount">{{ number_format($item->price) }} VNĐ</span></span>
                                         </a>
 
-                                        <a class="add_to_cart_button" data-quantity="1" data-product_sku="" data-product_id="22" rel="nofollow" href="single-product.html">Select options</a>
+                                        {{-- Nút này bây giờ sẽ thẳng hàng --}}
+                                        <a class="add_to_cart_button" href="{{ route('add_to_cart', $item->id) }}" rel="nofollow">Thêm vào giỏ</a>
                                     </li>
-
-                                    <li class="product">
-                                        <a href="/single-product">
-                                            <img width="325" height="325" alt="T_4_front" class="attachment-shop_catalog wp-post-image" src="img/product-4.jpg">
-                                            <h3>Ship Your Idea</h3>
-                                            <span class="price"><span class="amount">£20.00</span></span>
-                                        </a>
-
-                                        <a class="add_to_cart_button" data-quantity="1" data-product_sku="" data-product_id="22" rel="nofollow" href="single-product.html">Select options</a>
-                                    </li>
+                                    @endforeach
                                 </ul>
                             </div>
-
+ 
 
                             <div class="cart_totals ">
                                 <h2>Cart Totals</h2>
@@ -165,18 +189,18 @@
                                 <table cellspacing="0">
                                     <tbody>
                                         <tr class="cart-subtotal">
-                                            <th>Cart Subtotal</th>
-                                            <td><span class="amount">£15.00</span></td>
+                                            <th>Tạm tính</th>
+                                            <td><span class="amount">{{ number_format($total) }} VNĐ</span></td>
                                         </tr>
 
                                         <tr class="shipping">
-                                            <th>Shipping and Handling</th>
-                                            <td>Free Shipping</td>
+                                            <th>Phí vận chuyển</th>
+                                            <td>Miễn phí</td>
                                         </tr>
 
                                         <tr class="order-total">
-                                            <th>Order Total</th>
-                                            <td><strong><span class="amount">£15.00</span></strong> </td>
+                                            <th>Tổng cộng</th>
+                                            <td><strong><span class="amount">{{ number_format($total) }} VNĐ</span></strong> </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -457,7 +481,74 @@
         </div>
     </div>
 @endsection
+{{-- Dán đoạn này vào cuối file cart.blade.php --}}
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // --- 1. XỬ LÝ NÚT TĂNG/GIẢM SỐ LƯỢNG ---
+        
+        // Khi nhấn nút Cộng (+)
+        $(document).on('click', '.plus', function() {
+            // Tìm ô input gần nhất
+            var $input = $(this).parent().find('input.qty');
+            var val = parseInt($input.val());
+            // Tăng lên 1 và kích hoạt sự kiện change
+            $input.val(val + 1).trigger('change');
+        });
+
+        // Khi nhấn nút Trừ (-)
+        $(document).on('click', '.minus', function() {
+            var $input = $(this).parent().find('input.qty');
+            var val = parseInt($input.val());
+            // Giảm đi 1 nhưng không được nhỏ hơn 1
+            if (val > 1) {
+                $input.val(val - 1).trigger('change');
+            }
+        });
+
+        // --- 2. XỬ LÝ TỰ ĐỘNG TÍNH TIỀN KHI SỐ LƯỢNG THAY ĐỔI ---
+
+        $(document).on('change', 'input.qty', function() {
+            var $row = $(this).closest('tr'); // Lấy dòng hiện tại
+            var qty = parseInt($(this).val()); // Lấy số lượng mới
+
+            // Lấy đơn giá (cần xử lý xóa chữ 'VNĐ' và dấu phẩy để tính toán)
+            var priceText = $row.find('.product-price .amount').text();
+            var price = parseInt(priceText.replace(/[^0-9]/g, '')); // Chỉ giữ lại số
+
+            // Tính thành tiền mới
+            var newSubtotal = qty * price;
+
+            // Định dạng lại thành tiền tệ Việt Nam (Ví dụ: 10.000.000 VNĐ)
+            var formattedSubtotal = new Intl.NumberFormat('vi-VN').format(newSubtotal) + ' VNĐ';
+
+            // Cập nhật hiển thị cột Total của dòng đó
+            $row.find('.product-subtotal .amount').text(formattedSubtotal);
+
+            // Gọi hàm cập nhật tổng giỏ hàng phía dưới
+            updateCartTotal();
+        });
+
+        // Hàm tính tổng cả giỏ hàng (Cart Totals)
+        function updateCartTotal() {
+            var grandTotal = 0;
+            
+            // Duyệt qua tất cả các dòng sản phẩm để cộng dồn tiền
+            $('.product-subtotal .amount').each(function() {
+                var val = parseInt($(this).text().replace(/[^0-9]/g, ''));
+                grandTotal += val;
+            });
+
+            // Định dạng và hiển thị ra 2 ô Tổng cộng phía dưới
+            var formattedGrandTotal = new Intl.NumberFormat('vi-VN').format(grandTotal) + ' VNĐ';
+            
+            // Cập nhật ô "Tạm tính" và "Tổng cộng"
+            $('.cart-subtotal .amount').text(formattedGrandTotal);
+            $('.order-total .amount').text(formattedGrandTotal);
+        }
+    });
+</script>
 
 
 

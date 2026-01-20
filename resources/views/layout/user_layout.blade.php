@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>eElectronics - HTML eCommerce Template</title>
     @yield('css')
     <!-- Google Fonts -->
-    <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,300,700,600' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,300,700,600' rel='stylesheet'
+        type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:400,700,300' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Raleway:400,100' rel='stylesheet' type='text/css'>
 
@@ -28,9 +30,9 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-  </head>
+</head>
 
-  <body>
+<body>
 
     <div class="header-area">
         <div class="container">
@@ -38,13 +40,38 @@
                 <div class="col-md-8">
                     <div class="user-menu">
                         <ul>
-                            <li><a href="#"><i class="fa fa-user"></i> Tài khoản</a></li>
+                            {{-- 1. Danh sách yêu thích --}}
                             <li><a href="#"><i class="fa fa-heart"></i> Danh sách yêu thích</a></li>
-                            <li><a href="/cart"><i class="fa fa-shopping-cart"></i> Giỏ hàng</a></li>
-                            <li><a href="/checkout"><i class="fa fa-money"></i> Thanh toán</a></li>
-                            <li><a href="/login"><i class="fa fa-user"></i> Đăng nhập</a></li>
-                            <li><a href="/signup"><i class="fa fa-user-plus"></i> Đăng ký</a></li>
 
+                            {{-- 2. Giỏ hàng --}}
+                            <li><a href="/cart"><i class="fa fa-shopping-cart"></i> Giỏ hàng</a></li>
+
+                            {{-- 3. Thanh toán --}}
+                            <li><a href="/checkout"><i class="fa fa-money"></i> Thanh toán</a></li>
+
+                            {{-- 4. Logic Đăng nhập / Đăng xuất --}}
+                            @if(Auth::check())
+                                {{-- NẾU ĐÃ ĐĂNG NHẬP --}}
+
+                                <li>
+                                    <a href="#">
+                                        <i class="fa fa-user"></i>
+                                        {{-- SỬA Ở ĐÂY: Dùng 'username' thay vì 'name' --}}
+                                        {{ Auth::user()->username }}
+                                    </a>
+                                </li>
+
+                                {{-- Nút Đăng xuất màu đỏ --}}
+                                <li>
+                                    <a href="{{ route('logout') }}" style="color: red; font-weight: bold;">
+                                        <i class="fa fa-sign-out"></i> Đăng xuất
+                                    </a>
+                                </li>
+                            @else
+                                {{-- NẾU CHƯA ĐĂNG NHẬP --}}
+                                <li><a href="/login"><i class="fa fa-user"></i> Đăng nhập</a></li>
+                                <li><a href="/signup"><i class="fa fa-user-plus"></i> Đăng ký</a></li>
+                            @endif
                         </ul>
                     </div>
                 </div>
@@ -65,7 +92,8 @@
 
                 <div class="col-sm-6">
                     <div class="shopping-item">
-                        <a href="/cart">Giỏ hàng - <span class="cart-amunt">$800</span> <i class="fa fa-shopping-cart"></i> <span class="product-count">5</span></a>
+                        <a href="/cart">Giỏ hàng - <span class="cart-amunt">$800</span> <i
+                                class="fa fa-shopping-cart"></i> <span class="product-count">5</span></a>
                     </div>
                 </div>
             </div>
@@ -106,7 +134,10 @@
                 <div class="col-md-3 col-sm-6">
                     <div class="footer-about-us">
                         <h2>e<span>Electronics</span></h2>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis sunt id doloribus vero quam laborum quas alias dolores blanditiis iusto consequatur, modi aliquid eveniet eligendi iure eaque ipsam iste, pariatur omnis sint! Suscipit, debitis, quisquam. Laborum commodi veritatis magni at?</p>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis sunt id doloribus vero
+                            quam laborum quas alias dolores blanditiis iusto consequatur, modi aliquid eveniet eligendi
+                            iure eaque ipsam iste, pariatur omnis sint! Suscipit, debitis, quisquam. Laborum commodi
+                            veritatis magni at?</p>
                         <div class="footer-social">
                             <a href="#" target="_blank"><i class="fa fa-facebook"></i></a>
                             <a href="#" target="_blank"><i class="fa fa-twitter"></i></a>
@@ -146,7 +177,8 @@
                 <div class="col-md-3 col-sm-6">
                     <div class="footer-newsletter">
                         <h2 class="footer-wid-title">Newsletter</h2>
-                        <p>Sign up to our newsletter and get exclusive deals you wont find anywhere else straight to your inbox!</p>
+                        <p>Sign up to our newsletter and get exclusive deals you wont find anywhere else straight to
+                            your inbox!</p>
                         <div class="newsletter-form">
                             <form action="#">
                                 <input type="email" placeholder="Type your email">
@@ -164,7 +196,8 @@
             <div class="row">
                 <div class="col-md-8">
                     <div class="copyright">
-                        <p>&copy; 2015 eElectronics. All Rights Reserved. Coded with <i class="fa fa-heart"></i> by <a href="http://wpexpand.com" target="_blank">WP Expand</a></p>
+                        <p>&copy; 2015 eElectronics. All Rights Reserved. Coded with <i class="fa fa-heart"></i> by <a
+                                href="http://wpexpand.com" target="_blank">WP Expand</a></p>
                     </div>
                 </div>
 
@@ -180,7 +213,7 @@
         </div>
     </div> <!-- End footer bottom area -->
 
-     <!-- Latest jQuery form server -->
+    <!-- Latest jQuery form server -->
     <script src="https://code.jquery.com/jquery.min.js"></script>
 
     <!-- Bootstrap JS form CDN -->
@@ -195,6 +228,8 @@
 
     <!-- Main Script -->
     <script src="js/main.js"></script>
+    <!--------------------------------------------->
     @yield('js')
-  </body>
+</body>
+
 </html>
