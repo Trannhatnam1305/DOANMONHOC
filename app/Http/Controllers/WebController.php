@@ -46,31 +46,29 @@ class WebController extends Controller
         return view('user.login'); 
     }
     public function postLogin(Request $request) {
-        // 1. Lấy dữ liệu và loại bỏ khoảng trắng thừa
-        $u = trim($request->username);
-        $p = $request->password;
+                $u = trim($request->username);
+                $p = $request->password;
 
-        // 2. Kiểm tra xem có lấy được data từ form không
-        if (!$u || !$p) {
-            return "Vui lòng nhập đầy đủ tài khoản và mật khẩu!";
-        }
+                $userInDb = \App\Models\User::where('username', $u)->first();
 
-        // 3. Truy vấn chính xác vào bảng users
-        $userInDb = \App\Models\User::where('username', $u)->first();
+                // Vì chúng ta đã biết mật khẩu khớp, giờ chỉ cần viết logic chuẩn của Laravel
+                if ($userInDb && \Hash::check($p, $userInDb->password)) {
+                    
+                    // Bước quan trọng nhất: Lưu trạng thái đăng nhập vào Session
+                    \Auth::login($userInDb); 
 
-        if (!$userInDb) {
-            // Nếu vẫn báo lỗi này, hãy kiểm tra file .env xem DB_DATABASE có đúng tên không
-            return "LỖI: Không tìm thấy Username '" . $u . "' trong DB. Kiểm tra lại hoa thường!";
-        }
+                    // Kiểm tra quyền: Nếu role = 1 là Admin
+                    if ($userInDb->role == 1) {
+                        return redirect('/admin')->with('status', 'Chào mừng Admin quay trở lại!');
+                    }
 
-        // 4. Kiểm tra mật khẩu
-        if (\Hash::check($p, $userInDb->password)) {
-            \Auth::login($userInDb);
-            return redirect('/')->with('status', 'Đăng nhập thành công!');
-        } else {
-            return "LỖI: Mật khẩu nhập vào không khớp với mã Hash trong DB!";
-        }
-    }
+                    // Nếu là người dùng thường (role = 0)
+                    return redirect('/')->with('status', 'Đăng nhập thành công!');
+                }
+
+                // Nếu quay lại đây nghĩa là sai thông tin
+                return back()->with('error', 'Tài khoản hoặc mật khẩu không chính xác!');
+            }
     public function logout(Request $request) {
         \Auth::logout();
         return redirect('/')->with('status', 'Đã đăng xuất!');
