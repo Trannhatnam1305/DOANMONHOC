@@ -9,11 +9,13 @@ use Illuminate\Support\Facades\Auth;
 
 class WebController extends Controller
 {
-    public function cart(){
+    public function cart()
+    {
         return view("user.cart");
     }
 
-    public function index(){
+    public function index()
+    {
         // 1. Lấy dữ liệu cho Slider (Ví dụ lấy 3 sản phẩm mới nhất)
         $sliders = DB::table('products')->orderBy('id', 'desc')->limit(3)->get();
 
@@ -30,50 +32,69 @@ class WebController extends Controller
             'products_top_new' => $products_top_new
         ]);
     }
-    public function shop(){
-        $product=DB::table('products')->get();
-        return view("user.shop",['products'=>$product]);
+    public function shop()
+    {
+        $product = DB::table('products')->get();
+        return view("user.shop", ['products' => $product]);
     }
 
-    public function contact(){
+    public function contact()
+    {
         return view("user.contact");
     }
-  
-    public function signup(){
+
+    public function signup()
+    {
         return view('user.signup');
     }
-    public function login() {
-        return view('user.login'); 
+    public function login()
+    {
+        return view('user.login');
     }
-    public function postLogin(Request $request) {
-                $u = trim($request->username);
-                $p = $request->password;
+    public function postLogin(Request $request)
+    {
+        // 1. Lấy dữ liệu từ form
+        $credentials = [
+            'username' => $request->username,
+            'password' => $request->password,
+        ];
 
-                $userInDb = \App\Models\User::where('username', $u)->first();
+        // 2. Kiểm tra đăng nhập bằng Auth::attempt
+        // Hàm này tự động so khớp username và mã hóa password để kiểm tra
+        if (Auth::attempt($credentials)) {
 
-                // Vì chúng ta đã biết mật khẩu khớp, giờ chỉ cần viết logic chuẩn của Laravel
-                if ($userInDb && \Hash::check($p, $userInDb->password)) {
-                    
-                    // Bước quan trọng nhất: Lưu trạng thái đăng nhập vào Session
-                    \Auth::login($userInDb); 
+            // --- ĐOẠN KIỂM TRA KHÓA TÀI KHOẢN ---
+            // Lấy thông tin user vừa đăng nhập thành công
+            $user = Auth::user();
 
-                    // Kiểm tra quyền: Nếu role = 1 là Admin
-                    if ($userInDb->role == 1) {
-                        return redirect('/admin')->with('status', 'Chào mừng Admin quay trở lại!');
-                    }
+            if ($user->status == 0) {
+                // Nếu status = 0 (Bị khóa) -> Đăng xuất ngay lập tức
+                Auth::logout();
 
-                    // Nếu là người dùng thường (role = 0)
-                    return redirect('/')->with('status', 'Đăng nhập thành công!');
-                }
+                // Xóa session để an toàn
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
 
-                // Nếu quay lại đây nghĩa là sai thông tin
-                return back()->with('error', 'Tài khoản hoặc mật khẩu không chính xác!');
+                // Trả về trang đăng nhập với thông báo lỗi
+                return redirect()->back()->with('error', 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin!');
             }
-    public function logout(Request $request) {
+            // -------------------------------------
+
+            // Nếu tài khoản hoạt động bình thường (status = 1)
+            // Chuyển hướng về trang chủ hoặc trang shop
+            return redirect('/'); // Hoặc route('/') tùy project của bạn
+        }
+
+        // 3. Nếu đăng nhập thất bại (Sai username hoặc password)
+        return redirect()->back()->with('error', 'Tên đăng nhập hoặc mật khẩu không đúng!');
+    }
+    public function logout(Request $request)
+    {
         \Auth::logout();
         return redirect('/')->with('status', 'Đã đăng xuất!');
     }
-    public function postSignup(Request $request) {
+    public function postSignup(Request $request)
+    {
         // Kiểm tra dữ liệu đầu vào
         $request->validate([
             'username' => 'required|unique:users,username|min:3',
@@ -99,5 +120,6 @@ class WebController extends Controller
         return redirect('/')->with('status', 'Đăng ký tài khoản thành công!');
     }
 
-};
+}
+;
 

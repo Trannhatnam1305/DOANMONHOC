@@ -1,74 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Thêm sản phẩm</title>
     <link rel="stylesheet" href="{{ asset('css/admin/addProduct.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-
 <body>
-    {{-- enctype để upload hình ảnh --}}
     <form action="/admin/addsanpham" method="post" enctype="multipart/form-data">
         @csrf
-        <h2>Thêm sản phẩm mới</h2>
+        <h2><i class="fas fa-box-open"></i> Thêm sản phẩm mới</h2>
 
-        <label for="name">Tên sản phẩm:</label><br>
-        <input type="text" id="name" name="name" required><br><br>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="name">Tên sản phẩm:</label>
+                <input type="text" id="name" name="name" value="{{ old('name') }}" placeholder="VD: Dell XPS 13">
+                @error('name') <small class="text-danger">{{ $message }}</small> @enderror
+            </div>
 
-        <label for="price">Giá:</label><br>
-        <input type="number" id="price" name="price" required><br><br>
-        <label for="discount_price">Giá Giảm:</label><br>
-        <input type="number" id="discount_price" name="discount_price" required><br><br>
-        <label for="description">Mô tả:</label><br>
-        <textarea id="description" name="description" rows="4" cols="50"></textarea><br><br>
+            <div class="form-group">
+                <label for="price">Giá gốc (Tối đa 999.999.999):</label>
+                <input type="number" id="price" name="price" value="{{ old('price') }}" max="999999999">
+                @error('price') <small class="text-danger">{{ $message }}</small> @enderror
+            </div>
 
-        <label for="image">Hình ảnh:</label><br>
-        <input type="file" id="image" name="image"><br><br>
+            <div class="form-group">
+                <label for="discount_price">Giá Giảm:</label>
+                <input type="number" id="discount_price" name="discount_price" value="{{ old('discount_price', 0) }}" max="999999999">
+            </div>
 
-        <label for="category">Loại Sản Phẩm:</label><br>
+            <div class="form-group">
+                <label for="category_id">Loại Sản Phẩm (ID):</label>
+                <input type="number" id="category_id" name="category_id" value="{{ old('category_id') }}">
+                @error('category_id') <small class="text-danger">{{ $message }}</small> @enderror
+            </div>
 
-        <select name="category" >
-            @foreach ($categories as $category)
-                <option value={{$category->id}}>{{$category->name}}</option>
-            @endforeach
-        </select>
-        <label for="type">Loại:</label><br>
-        <input type="number" id="type" name="type" required><br><br>
+            <div class="form-group">
+                <label for="brand_id">Thương Hiệu (ID):</label>
+                <input type="number" id="brand_id" name="brand_id" value="{{ old('brand_id') }}">
+                @error('brand_id') <small class="text-danger">{{ $message }}</small> @enderror
+            </div>
 
-        <label for="tag">Tag:</label><br>
-        <input type="text" id="tag" name="tag" required><br><br>
+            <div class="form-group">
+                <label for="loai">Phân loại (0: Mới, 1: Bán chạy):</label>
+                <input type="number" id="loai" name="loai" value="{{ old('loai') }}" placeholder="0 hoặc 1">
+                @error('loai') <small class="text-danger">{{ $message }}</small> @enderror
+            </div>
 
-        <label for="status">Trạng Thái:</label><br>
-        <select name="status">
-            <option value="1">Hoạt động</option>
-            <option value="0">Không hoạt động</option>
-        </select>
-        <label for="brand">Thương Hiệu:</label><br>
-        <select name="brand">
-            @foreach ($brands as $brand)
-                <option value={{$brand->id}}>{{$brand->name}}</option>
-            @endforeach
-        </select>
-        <label for="supplier">Nhà Cung Cấp:</label><br>
-        <select name="supplier" >
-            @foreach ($suppliers as $supplier)
-                <option value={{$supplier->id}}>{{$supplier->name}}</option>
-            @endforeach
-        </select>
-        <div class="button-group">
-            <button type="submit" class="btn btn-add">
-                Thêm sản phẩm
-            </button>
-            <button type="button" class="btn btn-cancel" onclick="window.location.href='{{ route('admin.sanpham') }}'">
-                Hủy
-            </button>
+            <div class="form-group">
+                <label for="tags">Tags:</label>
+                <input type="text" id="tags" name="tags" value="{{ old('tags') }}" placeholder="laptop, gaming,...">
+            </div>
+
+            <div class="form-group">
+                <label for="status">Trạng Thái:</label>
+                <select name="status">
+                    <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>Hiển thị trên web</option>
+                    <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Ẩn sản phẩm</option>
+                </select>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="description">Mô tả sản phẩm:</label>
+                <textarea id="description" name="description" rows="3">{{ old('description') }}</textarea>
+                @error('description') <small class="text-danger">{{ $message }}</small> @enderror
+            </div>
+
+            <div class="form-group full-width">
+                <label for="image">Hình ảnh sản phẩm:</label>
+                <input type="file" id="image" name="image">
+                @error('image') <small class="text-danger">{{ $message }}</small> @enderror
+            </div>
         </div>
 
+        <div class="button-group">
+            <button type="submit" class="btn btn-add"><i class="fas fa-save"></i> Lưu dữ liệu</button>
+            <button type="button" class="btn btn-cancel" onclick="window.location.href='{{ route('admin.sanpham') }}'">Hủy bỏ</button>
+        </div>
     </form>
-
 </body>
-
 </html>
