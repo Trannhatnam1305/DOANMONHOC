@@ -4,12 +4,16 @@
     <link rel="stylesheet" href="{{ asset('css/admin/Manage.css') }}">
 @endsection
 @section('admin')
-    <div class="container">
-        <div class="header">
-            <button class="create-button">
-                <span class="icon">+</span> Tạo mới
+            <div class="container">
+    <div class="header" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+        <a href="{{ route('admin.them-loaisanpham') }}" style="text-decoration: none;">
+            <button class="create-button" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <span class="icon" style="font-weight: bold; font-size: 1.2rem;">+</span> 
+                Tạo loại sản phẩm mới
             </button>
+        </a>
         </div>
+    </div>
 
         <table class="product-table">
             <thead class="the">

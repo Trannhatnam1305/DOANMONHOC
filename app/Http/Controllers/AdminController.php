@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str; // Nhớ thêm dòng này ở trên cùng file
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\OrderItem;
@@ -51,52 +52,39 @@ class AdminController extends Controller
     }
 
     public function login(Request $request)
-    {
-        // 1. Validate dữ liệu đầu vào
-        $credentials = $request->validate([
-            'username' => 'required',
-            'password' => 'required'
-        ]);
+        {
+            // 1. Validate
+            $credentials = $request->validate([
+                'username' => 'required',
+                'password' => 'required'
+            ]);
 
-        // 2. Thử đăng nhập
-        if (Auth::attempt($credentials)) {
+            // 2. Thử đăng nhập
+            if (Auth::attempt($credentials)) {
+                $user = Auth::user();
 
-            $request->session()->regenerate();
+                // Kiểm tra quyền và trạng thái cùng lúc
+                if ($user->status == 0 || $user->role < 1) {
+                    $message = ($user->status == 0) 
+                                ? 'Tài khoản quản trị của bạn đã bị khóa!' 
+                                : 'Tài khoản của bạn không có quyền quản trị!';
 
-            // Lấy thông tin user vừa đăng nhập
-            $user = Auth::user();
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
 
-            // --- MỚI THÊM: KIỂM TRA TRẠNG THÁI (STATUS) ---
-            // Nếu status = 0 (Bị khóa) thì đăng xuất ngay
-            if ($user->status == 0) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+                    return redirect()->route('admin.login')->with('error', $message);
+                }
 
-                return redirect()->route('admin.login')->with('error', 'Tài khoản quản trị của bạn đã bị khóa!');
+                $request->session()->regenerate();
+                return redirect()->route('admin.index')->with('status', 'Chào mừng Admin quay trở lại!');
             }
-            // ----------------------------------------------
 
-            // --- KIỂM TRA QUYỀN (ROLE) ---
-            // Nếu KHÔNG PHẢI ADMIN (role < 1)
-            if ($user->role < 1) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-
-                return redirect()->route('admin.login')->with('error', 'Tài khoản của bạn không có quyền quản trị!');
-            }
-            // -----------------------------
-
-            // Nếu mọi thứ OK (Admin và Không bị khóa) -> Vào Dashboard
-            return redirect()->route('admin.index')->with('status', 'Đăng nhập thành công!');
+            // 3. Sai thông tin
+            return back()->withErrors([
+                'username' => 'Thông tin đăng nhập không chính xác.',
+            ])->withInput($request->only('username')); // Giữ lại tên đăng nhập để user không phải nhập lại
         }
-
-        // 3. Nếu sai username hoặc password
-        return back()->withErrors([
-            'username' => 'Thông tin đăng nhập không chính xác.',
-        ]);
-    }
 
     public function SanPham(Request $request)
     {
@@ -128,25 +116,27 @@ class AdminController extends Controller
 
     public function AddProduct()
     {
-        #$category = DB::table('categories')->select('id', 'name')->get();
-        #$suppliers = DB::table('suppliers')->select('id', 'name')->get();
-        #$brands = DB::table('brands')->select('id', 'name')->get();
-        #return view('admin.addProduct', ['categories' => $category, 'suppliers' => $suppliers, 'brands' => $brands]);
-        return view('admin.addProduct');
+        $categories = DB::table('categories')->select('id', 'name')->get();
+        $suppliers = DB::table('suppliers')->select('id', 'name')->get();
+        $brands = DB::table('brands')->select('id', 'name')->get();
+
+        // compact sẽ tự hiểu là tạo mảng với key giống tên biến
+        return view('admin.addProduct', compact('categories', 'suppliers', 'brands'));
     }
 
     public function ThemSanPham(Request $request)
     {
-        // 1. Ràng buộc không được để trống (ngoại trừ discount_price)
+        // 1. Ràng buộc dữ liệu
         $request->validate([
             'name' => 'required|max:255',
             'price' => 'required|numeric',
             'description' => 'required',
             'category_id' => 'required|integer',
             'brand_id' => 'required|integer',
-            'loai' => 'required|integer',
+            'supplier_id' => 'required|integer', // ĐÃ SỬA: Phải là required
+            'loai' => 'required',
             'tags' => 'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Bắt buộc chọn ảnh khi thêm mới
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ], [
             'required' => ':attribute không được để trống.',
             'numeric' => ':attribute phải là con số.',
@@ -158,7 +148,9 @@ class AdminController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads'), $fileName);
+            // Nên lưu vào storage/app/public/products để đồng bộ với Seeder trước đó
+            $file->move(public_path('storage/products'), $fileName);
+            $dbPath = 'products/' . $fileName; // Lưu đường dẫn này vào DB
         }
 
         // 3. Insert dữ liệu
@@ -167,9 +159,10 @@ class AdminController extends Controller
             'price' => $request->price,
             'discount_price' => $request->discount_price ?? 0,
             'description' => $request->description,
-            'image' => $fileName,
+            'image' => $dbPath ?? 'products/no-image.png',
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
+            'supplier_id' => $request->supplier_id, // ĐÃ THÊM: Quan trọng nhất
             'loai' => $request->loai,
             'tags' => $request->tags,
             'status' => $request->status ?? 1,
@@ -369,6 +362,90 @@ class AdminController extends Controller
         $action = $user->status ? 'Mở khóa' : 'Khóa';
         return redirect()->back()->with('status', "Đã $action tài khoản {$user->username} thành công!");
     }
+    // Thêm hàm này vào nếu chưa có
+    public function NhaCungCap()
+    {
+       $dsNhacungcap = DB::table('suppliers')->get();
+        return view('admin.NhaCungCapAdmin', compact('dsNhacungcap'));
+    }
+    public function ThemNhaCungCap() {
+    return view('admin.addNhaCungCap'); // Tên file blade của bạn
+}
+    public function LuuNhaCungCap(Request $request)
+            {
+                // 1. Kiểm tra dữ liệu (Validate) bằng tiếng Việt
+                $request->validate([
+                    'name'           => 'required|max:255',
+                    'phone'          => 'required|numeric',
+                    'email'          => 'required|email|unique:suppliers,email',
+                    'contact_person' => 'nullable|max:255',
+                ], [
+                    'name.required'  => 'Vui lòng nhập tên công ty.',
+                    'phone.required' => 'Vui lòng nhập số điện thoại.',
+                    'phone.numeric'  => 'Số điện thoại phải là định dạng số.',
+                    'email.required' => 'Vui lòng nhập địa chỉ email.',
+                    'email.email'    => 'Email không đúng định dạng.',
+                    'email.unique'   => 'Email nhà cung cấp này đã tồn tại trong hệ thống!',
+                ]);
+
+                // 2. Lưu vào Database
+                DB::table('suppliers')->insert([
+                    'name'           => $request->name,
+                    'contact_person' => $request->contact_person,
+                    'phone'          => $request->phone,
+                    'email'          => $request->email,
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
+                ]);
+
+                // 3. Quay lại trang danh sách và thông báo
+                return redirect()->route('admin.nhacungcap')->with('success', 'Đã thêm nhà cung cấp thành công!');
+            }
+
+        public function ThemLoaiSanPham() {
+    return view('admin.addLoaiSanPham');
+}
+
+    public function LuuLoaiSanPham(Request $request) {
+        // Validate dữ liệu
+        $request->validate([
+            'name' => 'required|unique:categories,name|max:255',
+            'status' => 'required|integer'
+        ], [
+            'name.required' => 'Bạn chưa nhập tên loại sản phẩm.',
+            'name.unique' => 'Tên loại sản phẩm này đã tồn tại.',
+        ]);
+
+        // Lưu vào bảng categories (hoặc bảng loai_san_pham tùy bạn đặt tên)
+        DB::table('categories')->insert([
+            'name' => $request->name,
+            'slug' => Str::slug($request->name), // Tự động tạo slug: "Laptop Gaming" -> "laptop-gaming"
+            'status' => $request->status, // 1: Hiển thị, 0: Ẩn
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('admin.loaisanpham')->with('success', 'Thêm loại sản phẩm thành công!');
+    }
+
+    public function editSocials()
+        {
+            $socials = DB::table('settings')->pluck('value', 'key');
+            return view('admin.socials', compact('socials'));
+        }
+
+    public function updateSocials(Request $request)
+        {
+            $platforms = ['facebook', 'twitter', 'youtube', 'linkedin', 'pinterest'];
+            foreach ($platforms as $platform) {
+                DB::table('settings')->updateOrInsert(
+                    ['key' => $platform],
+                    ['value' => $request->input($platform)]
+                );
+            }
+            return redirect()->back()->with('success', 'Đã cập nhật link thành công!');
+        }
+
 }
 
 

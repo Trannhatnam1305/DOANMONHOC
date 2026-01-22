@@ -7,11 +7,13 @@
 @section('admin')
     <div class="container">
         <div class="header">
-            <button class="create-button">
-                <span class="icon">+</span> Tạo mới
-            </button>
+            <a href="{{ route('admin.addLoaiSanPham') }}" style="text-decoration: none;">
+                <button class="create-button">
+                    <span class="icon">+</span> Tạo mới
+                </button>
+            </a>
         </div>
-
+    </div>
         <table class="product-table">
             <thead class="the">
                 <tr>

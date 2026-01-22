@@ -126,11 +126,11 @@
                         <h2>e<span>Electronics</span></h2>
                         <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis sunt id doloribus vero quam laborum quas alias dolores blanditiis iusto consequatur, modi aliquid eveniet eligendi iure eaque ipsam iste, pariatur omnis sint! Suscipit, debitis, quisquam. Laborum commodi veritatis magni at?</p>
                         <div class="footer-social">
-                            <a href="#" target="_blank"><i class="fa fa-facebook"></i></a>
-                            <a href="#" target="_blank"><i class="fa fa-twitter"></i></a>
-                            <a href="#" target="_blank"><i class="fa fa-youtube"></i></a>
-                            <a href="#" target="_blank"><i class="fa fa-linkedin"></i></a>
-                            <a href="#" target="_blank"><i class="fa fa-pinterest"></i></a>
+                            <a href="{{ $socials['facebook'] ?? '#' }}" target="_blank"><i class="fa fa-facebook"></i></a>
+                            <a href="{{ $socials['twitter'] ?? '#' }}" target="_blank"><i class="fa fa-twitter"></i></a>
+                            <a href="{{ $socials['youtube'] ?? '#' }}" target="_blank"><i class="fa fa-youtube"></i></a>
+                            <a href="{{ $socials['linkedin'] ?? '#' }}" target="_blank"><i class="fa fa-linkedin"></i></a>
+                            <a href="{{ $socials['pinterest'] ?? '#' }}" target="_blank"><i class="fa fa-pinterest"></i></a>
                         </div>
                     </div>
                 </div>
