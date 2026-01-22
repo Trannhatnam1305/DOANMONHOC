@@ -51,52 +51,39 @@ class AdminController extends Controller
     }
 
     public function login(Request $request)
-    {
-        // 1. Validate dữ liệu đầu vào
-        $credentials = $request->validate([
-            'username' => 'required',
-            'password' => 'required'
-        ]);
+        {
+            // 1. Validate
+            $credentials = $request->validate([
+                'username' => 'required',
+                'password' => 'required'
+            ]);
 
-        // 2. Thử đăng nhập
-        if (Auth::attempt($credentials)) {
+            // 2. Thử đăng nhập
+            if (Auth::attempt($credentials)) {
+                $user = Auth::user();
 
-            $request->session()->regenerate();
+                // Kiểm tra quyền và trạng thái cùng lúc
+                if ($user->status == 0 || $user->role < 1) {
+                    $message = ($user->status == 0) 
+                                ? 'Tài khoản quản trị của bạn đã bị khóa!' 
+                                : 'Tài khoản của bạn không có quyền quản trị!';
 
-            // Lấy thông tin user vừa đăng nhập
-            $user = Auth::user();
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
 
-            // --- MỚI THÊM: KIỂM TRA TRẠNG THÁI (STATUS) ---
-            // Nếu status = 0 (Bị khóa) thì đăng xuất ngay
-            if ($user->status == 0) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+                    return redirect()->route('admin.login')->with('error', $message);
+                }
 
-                return redirect()->route('admin.login')->with('error', 'Tài khoản quản trị của bạn đã bị khóa!');
+                $request->session()->regenerate();
+                return redirect()->route('admin.index')->with('status', 'Chào mừng Admin quay trở lại!');
             }
-            // ----------------------------------------------
 
-            // --- KIỂM TRA QUYỀN (ROLE) ---
-            // Nếu KHÔNG PHẢI ADMIN (role < 1)
-            if ($user->role < 1) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-
-                return redirect()->route('admin.login')->with('error', 'Tài khoản của bạn không có quyền quản trị!');
-            }
-            // -----------------------------
-
-            // Nếu mọi thứ OK (Admin và Không bị khóa) -> Vào Dashboard
-            return redirect()->route('admin.index')->with('status', 'Đăng nhập thành công!');
+            // 3. Sai thông tin
+            return back()->withErrors([
+                'username' => 'Thông tin đăng nhập không chính xác.',
+            ])->withInput($request->only('username')); // Giữ lại tên đăng nhập để user không phải nhập lại
         }
-
-        // 3. Nếu sai username hoặc password
-        return back()->withErrors([
-            'username' => 'Thông tin đăng nhập không chính xác.',
-        ]);
-    }
 
     public function SanPham(Request $request)
     {

@@ -39,8 +39,8 @@ Route::get('/delete-cart/{id}', [WebController::class, 'deleteCart'])->name('del
 //Route Trang Chủ Admin + Kiểm Tra Login Bằng Middleware
 Route::get('/admin',[AdminController::class,'LoadAdmin'])->name('admin.index')->middleware(IsLogin::class);
 //Route Trang Login Admin
-//Route::get('/admin/login',[AdminController::class,'loginPage'])->name('admin.login');
-//Route::post("/admin/login",[AdminController::class,'login']);
+Route::get('/admin/login',[AdminController::class,'loginPage'])->name('admin.login');
+Route::post("/admin/login",[AdminController::class,'login']);
 //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Sản Phẩm
 // Route cho trang Thêm người dùng 
 Route::get('/admin/nguoidung/create', [AdminController::class, 'createQuanTriVien'])->name('admin.user.create');
