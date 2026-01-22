@@ -7,7 +7,7 @@ use App\Http\Middleware\IsAdmin;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\ResultToken;
 use App\Http\Middleware\IsLogin;
-
+use App\Http\Controllers\CartController;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
@@ -32,7 +32,14 @@ Route::get('/cart', [WebController::class, 'cart'])->name('cart');
 Route::get('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
 // Route xóa sản phẩm khỏi giỏ hàng
 Route::get('/delete-cart/{id}', [WebController::class, 'deleteCart'])->name('delete_cart');
-
+// Thêm ->name('product_detail') vào cuối route của bạn
+Route::get('/san-pham/{id}', [WebController::class, 'show'])->name('product_detail');
+// Route xử lý tăng giảm số lượng
+Route::get('/cart', [WebController::class, 'cart'])->name('cart');
+Route::get('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
+Route::get('/delete-cart/{id}', [WebController::class, 'deleteCart'])->name('delete_cart');
+Route::get('/update-cart-quantity/{id}/{type}', [WebController::class, 'updateQuantity'])->name('update_cart_quantity');
+Route::get('/checkout', [WebController::class, 'checkout'])->name('checkout');
 
 //--------------------------------------------Route Admin-----------------------------------------------
 
@@ -56,8 +63,15 @@ Route::get('/admin/sanpham/phuc-hoi/{id}', [AdminController::class, 'PhucHoiSanP
 Route::get('/admin/sanpham', [AdminController::class, 'SanPham'])->name('admin.sanpham');
 //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Nhà Cung Cấp
 Route::get('/admin/nhacungcap', [AdminController::class, 'NhaCungCap'])->name('admin.nhacungcap');
+Route::get('/nhacungcap', [AdminController::class, 'NhaCungCap'])->name('admin.nhacungcap');
+// 2. Trang hiển thị Form thêm mới
+Route::get('/nhacungcap/them', [AdminController::class, 'ThemNhaCungCap'])->name('admin.them-nhacungcap');
+// 3. Xử lý lưu dữ liệu (Method POST)
+Route::post('/nhacungcap/luu', [AdminController::class, 'LuuNhaCungCap'])->name('admin.luu-nhacungcap');
 //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Loại Sản Phẩm
 Route::get('/admin/loaisanpham', [AdminController::class, 'LoaiSanPham'])->name('admin.loaisanpham');
+Route::get('/loaisanpham/them', [AdminController::class, 'ThemLoaiSanPham'])->name('admin.them-loaisanpham');
+Route::post('/loaisanpham/luu', [AdminController::class, 'LuuLoaiSanPham'])->name('admin.luu-loaisanpham');
 //Router SảnPhẩm Admin -> Người Dùng
 Route::get('/admin/nguoidung', [AdminController::class, 'danhSachNguoiDung'])->name('admin.nguoidung');
 //Router AddSanPham
@@ -77,7 +91,8 @@ Route::get('/fix-admin', function() {
     }
     return "Không tìm thấy user admin để sửa.";
 });
-
+Route::get('/socials', [AdminController::class, 'editSocials'])->name('admin.socials');
+Route::post('/socials/update', [AdminController::class, 'updateSocials'])->name('admin.socials.update');
 
 
 //--------------------------------------------Middleware------------------------------------------------

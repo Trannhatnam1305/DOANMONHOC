@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str; // Nhớ thêm dòng này ở trên cùng file
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\OrderItem;
@@ -367,6 +368,84 @@ class AdminController extends Controller
        $dsNhacungcap = DB::table('suppliers')->get();
         return view('admin.NhaCungCapAdmin', compact('dsNhacungcap'));
     }
+    public function ThemNhaCungCap() {
+    return view('admin.addNhaCungCap'); // Tên file blade của bạn
+}
+    public function LuuNhaCungCap(Request $request)
+            {
+                // 1. Kiểm tra dữ liệu (Validate) bằng tiếng Việt
+                $request->validate([
+                    'name'           => 'required|max:255',
+                    'phone'          => 'required|numeric',
+                    'email'          => 'required|email|unique:suppliers,email',
+                    'contact_person' => 'nullable|max:255',
+                ], [
+                    'name.required'  => 'Vui lòng nhập tên công ty.',
+                    'phone.required' => 'Vui lòng nhập số điện thoại.',
+                    'phone.numeric'  => 'Số điện thoại phải là định dạng số.',
+                    'email.required' => 'Vui lòng nhập địa chỉ email.',
+                    'email.email'    => 'Email không đúng định dạng.',
+                    'email.unique'   => 'Email nhà cung cấp này đã tồn tại trong hệ thống!',
+                ]);
+
+                // 2. Lưu vào Database
+                DB::table('suppliers')->insert([
+                    'name'           => $request->name,
+                    'contact_person' => $request->contact_person,
+                    'phone'          => $request->phone,
+                    'email'          => $request->email,
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
+                ]);
+
+                // 3. Quay lại trang danh sách và thông báo
+                return redirect()->route('admin.nhacungcap')->with('success', 'Đã thêm nhà cung cấp thành công!');
+            }
+
+        public function ThemLoaiSanPham() {
+    return view('admin.addLoaiSanPham');
+}
+
+    public function LuuLoaiSanPham(Request $request) {
+        // Validate dữ liệu
+        $request->validate([
+            'name' => 'required|unique:categories,name|max:255',
+            'status' => 'required|integer'
+        ], [
+            'name.required' => 'Bạn chưa nhập tên loại sản phẩm.',
+            'name.unique' => 'Tên loại sản phẩm này đã tồn tại.',
+        ]);
+
+        // Lưu vào bảng categories (hoặc bảng loai_san_pham tùy bạn đặt tên)
+        DB::table('categories')->insert([
+            'name' => $request->name,
+            'slug' => Str::slug($request->name), // Tự động tạo slug: "Laptop Gaming" -> "laptop-gaming"
+            'status' => $request->status, // 1: Hiển thị, 0: Ẩn
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('admin.loaisanpham')->with('success', 'Thêm loại sản phẩm thành công!');
+    }
+
+    public function editSocials()
+        {
+            $socials = DB::table('settings')->pluck('value', 'key');
+            return view('admin.socials', compact('socials'));
+        }
+
+    public function updateSocials(Request $request)
+        {
+            $platforms = ['facebook', 'twitter', 'youtube', 'linkedin', 'pinterest'];
+            foreach ($platforms as $platform) {
+                DB::table('settings')->updateOrInsert(
+                    ['key' => $platform],
+                    ['value' => $request->input($platform)]
+                );
+            }
+            return redirect()->back()->with('success', 'Đã cập nhật link thành công!');
+        }
+
 }
 
 

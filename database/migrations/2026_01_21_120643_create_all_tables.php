@@ -141,6 +141,13 @@ return new class extends Migration
             $table->longText('exception');
             $table->timestamp('failed_at')->useCurrent();
         });
+
+        Schema::create('settings', function (Blueprint $table) {
+            $table->id();
+            $table->string('key')->unique(); // Lưu tên: facebook, twitter...
+            $table->text('value')->nullable(); // Lưu link
+            $table->timestamps();
+        });
     }
 
     /**
@@ -164,5 +171,6 @@ return new class extends Migration
         Schema::dropIfExists('users');
         Schema::dropIfExists('cache_locks');
         Schema::dropIfExists('cache');
+        Schema::dropIfExists('settings');
     }
 };

@@ -299,6 +299,7 @@
                                 <li>
                                     <a href="{{ route('admin.sanpham') }}" class="fa fas fa-truck"> Sản Phẩm</a>
                                 </li>
+                                
                             </ul>
                             <!-- /.nav-second-level -->
                         </li>
@@ -310,6 +311,9 @@
                         </li>
                         <li>
                             <a href="{{ route('admin.nguoidung')}} "> <i class="fa fa-users fa-fw"></i> Người Dùng</a>
+                        </li>
+                        <li>
+                            <a href="{{route('admin.socials')}}"><i class="fa fa-home fa-fw"></i>Mạng Xã Hội </a>
                         </li>
                     </ul>
                 </div>

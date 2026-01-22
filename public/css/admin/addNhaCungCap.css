@@ -1,0 +1,41 @@
+/* public/css/admin/addNhaCungCap.css */
+body {
+    background-color: #f4f7f6;
+    padding: 50px;
+    font-family: Arial, sans-serif;
+}
+
+.supplier-container {
+    background: white;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Chia 2 cột */
+    gap: 20px;
+}
+
+.full-width {
+    grid-column: span 2;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+input, textarea {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+.btn-add { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
+.btn-cancel { background: #dc3545; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; margin-right: 10px; }

@@ -10,22 +10,34 @@ use Illuminate\Support\Facades\Auth;
 class WebController extends Controller
 {
     public function cart()
-    {
-        // 1. Giỏ hàng
-        $cart = session()->get('cart', []);
+        {
+            // 1. Lấy dữ liệu giỏ hàng từ session
+            $cart = session()->get('cart', []);
 
-        // 2. Sidebar Products (ngẫu nhiên)
-        $products_sidebar = DB::table('products')->inRandomOrder()->limit(8)->get();
+            // 2. Sidebar Products - Chỉ lấy những sản phẩm đang được BẬT (status = 1)
+            $products_sidebar = DB::table('products')
+                ->where('status', 1) // Thêm điều kiện này
+                ->inRandomOrder()
+                ->limit(8)
+                ->get();
 
-        // 3. You may be interested in (ngẫu nhiên)
-        $products_interested = DB::table('products')->inRandomOrder()->limit(4)->get();
+            // 3. You may be interested in - Chỉ lấy sản phẩm đang BẬT
+            $products_interested = DB::table('products')
+                ->where('status', 1) // Thêm điều kiện này
+                ->inRandomOrder()
+                ->limit(4)
+                ->get();
 
-        // 4. [THÊM MỚI] Recent Posts - Lấy 5 sản phẩm mới nhất (theo ID giảm dần)
-        $recent_posts = DB::table('products')->orderBy('id', 'desc')->limit(5)->get();
+            // 4. Recent Posts - Lấy 5 sản phẩm mới nhất và đang BẬT
+            $recent_posts = DB::table('products')
+                ->where('status', 1) // Thêm điều kiện này
+                ->orderBy('id', 'desc')
+                ->limit(5)
+                ->get();
 
-        // 5. Trả về view kèm biến $recent_posts
-        return view('user.cart', compact('cart', 'products_sidebar', 'products_interested', 'recent_posts'));
-    }
+            // 5. Trả về view với tất cả các biến đã lọc
+            return view('user.cart', compact('cart', 'products_sidebar', 'products_interested', 'recent_posts'));
+        }
 
     public function addToCart($id)
     {
@@ -64,7 +76,7 @@ class WebController extends Controller
     {
         // 1. Lấy dữ liệu cho Slider (Ví dụ lấy 3 sản phẩm mới nhất)
         $sliders = DB::table('products')->orderBy('id', 'desc')->limit(3)->get();
-
+        $socials = DB::table('settings')->pluck('value', 'key');
         // 2. Lấy dữ liệu theo các nhóm 'loai' của bạn
         $products_seller = DB::table('products')->where('loai', 1)->limit(9)->get();
         $products_recently_view = DB::table('products')->where('loai', 2)->limit(3)->get();
@@ -75,13 +87,19 @@ class WebController extends Controller
             'sliders' => $sliders,
             'products_seller' => $products_seller,
             'products_recently_view' => $products_recently_view,
-            'products_top_new' => $products_top_new
+            'products_top_new' => $products_top_new,
+            'socials' => $socials, 
         ]);
     }
     public function shop()
     {
-        $product = DB::table('products')->get();
-        return view("user.shop", ['products' => $product]);
+        
+        $products = DB::table('products')
+                    ->where('status', 1)
+                    ->orderBy('id', 'desc')
+                    ->paginate(12); 
+
+        return view("user.shop", compact('products'));
     }
 
     public function contact()
@@ -177,6 +195,35 @@ class WebController extends Controller
 
         return redirect()->back()->with('success', 'Đã xóa sản phẩm thành công!');
     }
+    public function updateQuantity($id, $type)
+    {
+        // 1. Lấy giỏ hàng hiện tại từ session
+        $cart = session()->get('cart');
+
+        // 2. Kiểm tra xem sản phẩm có tồn tại trong giỏ không
+        if(isset($cart[$id])) {
+            if($type == 'plus') {
+                // Tăng số lượng
+                $cart[$id]['quantity']++;
+            } elseif($type == 'minus') {
+                // Giảm số lượng nhưng không được nhỏ hơn 1
+                if($cart[$id]['quantity'] > 1) {
+                    $cart[$id]['quantity']--;
+                }
+            }
+            
+            // 3. Lưu lại giỏ hàng mới vào session
+            session()->put('cart', $cart);
+        }
+
+        // 4. Quay lại trang giỏ hàng với thông báo
+        return redirect()->back()->with('success', 'Cập nhật số lượng thành công!');
+    }
+    public function checkout()
+    {
+        return view('user.checkout'); // Tạo file checkout.blade.php trống để hết lỗi
+    }
+
 }
 ;
 
