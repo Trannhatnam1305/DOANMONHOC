@@ -20,10 +20,12 @@ class UserSeeder extends Seeder
         // 1. Tạo tài khoản ADMIN (Role = 1)
         DB::table('users')->insert([
             'username'          => 'admin',
+            'name'              => null, // Để trống Name
             'email'             => 'admin@gmail.com',
+            'phone'             => null, // Để trống Phone
             'email_verified_at' => now(),
-            'password'          => Hash::make('password123'), // MK: password123
-            'role'              => 1, // Quyền Admin
+            'password'          => Hash::make('password123'),
+            'role'              => 1,
             'remember_token'    => Str::random(10),
             'created_at'        => now(),
             'updated_at'        => now(),
@@ -32,23 +34,27 @@ class UserSeeder extends Seeder
         // 2. Tạo tài khoản USER mẫu (Role = 0)
         DB::table('users')->insert([
             'username'          => 'nhatnam',
+            'name'              => null, // Để trống Name
             'email'             => 'nam@gmail.com',
+            'phone'             => null, // Để trống Phone
             'email_verified_at' => now(),
-            'password'          => Hash::make('123456'), // MK: 123456
-            'role'              => 0, // Quyền User
+            'password'          => Hash::make('123456'),
+            'role'              => 0,
             'remember_token'    => Str::random(10),
             'created_at'        => now(),
             'updated_at'        => now(),
         ]);
 
-        // 3. Tạo thêm 5 tài khoản ngẫu nhiên (Hỗn hợp)
+        // 3. Tạo thêm 5 tài khoản ngẫu nhiên
         foreach (range(1, 5) as $index) {
             DB::table('users')->insert([
                 'username'          => $faker->userName,
+                'name'              => null, // Để trống Name
                 'email'             => $faker->unique()->safeEmail,
+                'phone'             => null, // Để trống Phone
                 'email_verified_at' => now(),
                 'password'          => Hash::make('123456'),
-                'role'              => 0, // Mặc định là user
+                'role'              => 0,
                 'remember_token'    => Str::random(10),
                 'created_at'        => now(),
                 'updated_at'        => now(),

@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\OrderItem;
 use App\Models\Product;
-
+use App\Models\Contact;
 
 class AdminController extends Controller
 {
@@ -445,7 +445,27 @@ class AdminController extends Controller
             }
             return redirect()->back()->with('success', 'Đã cập nhật link thành công!');
         }
+    public function listContacts()
+        {
+            $contacts = \App\Models\Contact::orderBy('created_at', 'desc')->paginate(10);
+            
+            // Thử dùng cách truyền mảng này cho chắc chắn
+            return view('admin.contact', [
+                'contacts' => $contacts
+            ]);
+        }
 
+    public function markAsRead($id)
+        {
+            // Tìm tin nhắn theo ID
+            $contact = \App\Models\Contact::findOrFail($id);
+            
+            // Cập nhật trạng thái thành đã xem
+            $contact->update(['status' => 1]);
+            
+            // Quay lại trang danh sách kèm thông báo
+            return back()->with('success', 'Đã đánh dấu tin nhắn là đã đọc.');
+        }
 }
 
 

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\ResultToken;
 use App\Http\Middleware\IsLogin;
 use App\Http\Controllers\CartController;
+use App\Models\Contact;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
@@ -25,7 +26,7 @@ Route::get('/shop', [WebController::class, 'shop']);
 Route::get('/single-product', [WebController::class, 'singleproduct']);
 //Route Trang Contact
 Route::get('/contact', [WebController::class, 'contact']);
-Route::post('/addContact', [ContactController::class, 'addContact']);
+
 // Route xem trang giỏ hàng
 Route::get('/cart', [WebController::class, 'cart'])->name('cart');
 // Route thêm sản phẩm vào giỏ (nhận ID sản phẩm)
@@ -40,7 +41,9 @@ Route::get('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_
 Route::get('/delete-cart/{id}', [WebController::class, 'deleteCart'])->name('delete_cart');
 Route::get('/update-cart-quantity/{id}/{type}', [WebController::class, 'updateQuantity'])->name('update_cart_quantity');
 Route::get('/checkout', [WebController::class, 'checkout'])->name('checkout');
-
+Route::get('/profile', [WebController::class, 'editProfile'])->name('user.profile.edit');    
+Route::post('/profile/update', [WebController::class, 'updateProfile'])->name('user.profile.update');
+Route::post('/contact-send', [WebController::class, 'sendContact'])->name('contact.send');
 //--------------------------------------------Route Admin-----------------------------------------------
 
 //Route Trang Chủ Admin + Kiểm Tra Login Bằng Middleware
@@ -62,10 +65,9 @@ Route::get('/admin/sanpham/phuc-hoi/{id}', [AdminController::class, 'PhucHoiSanP
 //Router SảnPhẩm Admin
 Route::get('/admin/sanpham', [AdminController::class, 'SanPham'])->name('admin.sanpham');
 //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Nhà Cung Cấp
-Route::get('/admin/nhacungcap', [AdminController::class, 'NhaCungCap'])->name('admin.nhacungcap');
 Route::get('/nhacungcap', [AdminController::class, 'NhaCungCap'])->name('admin.nhacungcap');
 // 2. Trang hiển thị Form thêm mới
-Route::get('/nhacungcap/them', [AdminController::class, 'ThemNhaCungCap'])->name('admin.them-nhacungcap');
+Route::get('/nhacungcap/them', [AdminController::class, 'ThemNhaCungCap'])->name('admin.addNhaCungCap');
 // 3. Xử lý lưu dữ liệu (Method POST)
 Route::post('/nhacungcap/luu', [AdminController::class, 'LuuNhaCungCap'])->name('admin.luu-nhacungcap');
 //Router SảnPhẩm Admin -> Quản Lí Sản Phẩm -> Loại Sản Phẩm
@@ -93,8 +95,8 @@ Route::get('/fix-admin', function() {
 });
 Route::get('/socials', [AdminController::class, 'editSocials'])->name('admin.socials');
 Route::post('/socials/update', [AdminController::class, 'updateSocials'])->name('admin.socials.update');
-
-
+Route::get('/admin/contacts', [AdminController::class, 'listContacts'])->name('admin.contact');
+Route::get('/contacts/read/{id}',[AdminController::class, 'markAsRead'])->name('contact.read');
 //--------------------------------------------Middleware------------------------------------------------
 
 //Fallback lỗi url
@@ -110,7 +112,12 @@ Route::get('/middle', function () {
 
 Route::get('/login', [WebController::class, 'login'])->name('login');
 Route::post('/login', [WebController::class, 'postLogin'])->name('postLogin');
-Route::get('/signup', [WebController::class, 'signup'])->name('signup');
+Route::get('/signup', [WebController::class, 'signup'])->name('register'); 
 Route::post('/signup', [WebController::class, 'postSignup'])->name('postSignup');
-Route::get('/logout', [WebController::class, 'logout'])->name('logout');
+Route::post('/logout', [WebController::class, 'logout'])->name('logout');
+
+Route::post('/addContact', [ContactController::class, 'addContact']);
+Route::get('/contacts', [ContactController::class, 'index'])->name('contact.index');
+Route::get('/contacts/read/{id}', [ContactController::class, 'markAsRead'])->name('contact.read');
+Route::delete('/contacts/delete/{id}', [ContactController::class, 'destroy'])->name('contact.delete');
 

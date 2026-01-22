@@ -27,7 +27,12 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('username');
+            $table->string('name')->nullable()->after('username'); 
             $table->string('email')->unique();
+            $table->string('phone')->nullable()->after('email');
+            $table->date('birthday')->nullable()->after('phone'); 
+            $table->tinyInteger('gender')->nullable()->comment('0:Nam, 1:Nữ, 2:Khác')->after('birthday'); 
+            $table->text('address')->nullable()->after('gender'); 
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->tinyInteger('status')->default(1);
@@ -148,6 +153,17 @@ return new class extends Migration
             $table->text('value')->nullable(); // Lưu link
             $table->timestamps();
         });
+
+        Schema::create('contacts', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('phone');
+            $table->string('email');
+            $table->string('title');
+            $table->text('content'); // Phần nội dung từ bộ soạn thảo tin nhắn
+            $table->tinyInteger('status')->default(0); // 0: Chưa đọc, 1: Đã đọc
+            $table->timestamps();
+        });
     }
 
     /**
@@ -172,5 +188,6 @@ return new class extends Migration
         Schema::dropIfExists('cache_locks');
         Schema::dropIfExists('cache');
         Schema::dropIfExists('settings');
+        Schema::dropIfExists('contacts');
     }
 };

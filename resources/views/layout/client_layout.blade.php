@@ -43,24 +43,36 @@
                             <li><a href="/cart"><i class="fa fa-shopping-cart"></i> Giỏ hàng</a></li>
                             <li><a href="/checkout"><i class="fa fa-money"></i> Thanh toán</a></li>
                             <li>
-                                    @auth
+                                   {{-- 4. Logic Đăng nhập / Đăng xuất --}}
+                            @if(Auth::check())
+                                        {{-- HIỂN THỊ KHI ĐÃ ĐĂNG NHẬP --}}
                                         <li>
-                                            <a href="#">
+                                            {{-- Khớp với tên route đã đặt ở WebController --}}
+                                            <a href="{{ route('user.profile.edit') }}">
                                                 <i class="fa fa-user"></i> 
-                                                <strong>{{ Auth::user()->username }}</strong>
+                                                {{-- Ưu tiên hiển thị tên, nếu không có username thì dùng email hoặc name --}}
+                                                Xin chào, {{ Auth::user()->username ?? Auth::user()->name }}
                                             </a>
                                         </li>
+
                                         <li>
-                                            
-                                            <a href="{{ route('logout') }}" class="btn-logout " style="color:red;">
+                                            {{-- Nút Đăng xuất --}}
+                                            <a href="{{ route('logout') }}" 
+                                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                                            style="color: #ff4d4d; font-weight: bold;">
                                                 <i class="fa fa-sign-out"></i> Đăng xuất
                                             </a>
+                                            
+                                            {{-- Form ẩn để đăng xuất an toàn bằng phương thức POST --}}
+                                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                                @csrf
+                                            </form>
                                         </li>
                                     @else
-                                        <li><a href="{{ route('login') }}"><i class="fa fa-lock"></i> Đăng nhập</a></li>
-                                        <li><a href="{{ route('signup') }}"><i class="fa fa-user"></i> Đăng ký</a></li>
-                                    @endauth
-                        
+                                        {{-- HIỂN THỊ KHI CHƯA ĐĂNG NHẬP --}}
+                                        <li><a href="{{ route('login') }}"><i class="fa fa-unlock-alt"></i> Đăng nhập</a></li>
+                                        <li><a href="{{ route('register') }}"><i class="fa fa-user-plus"></i> Đăng ký</a></li>
+                                    @endif
                             </li>
 
                         </ul>

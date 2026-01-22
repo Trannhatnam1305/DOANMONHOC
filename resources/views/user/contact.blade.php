@@ -1,98 +1,112 @@
 @extends('layout.user_layout')
-@section('css')
-    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.css"><link rel="icon" type="image/png" href="https://ckeditor.com/assets/images/favicons/32x32.png" sizes="32x32">
-		<link rel="icon" type="image/png" href="https://ckeditor.com/assets/images/favicons/96x96.png" sizes="96x96">
-		<link rel="apple-touch-icon" type="image/png" href="https://ckeditor.com/assets/images/favicons/120x120.png" sizes="120x120">
-		<link rel="apple-touch-icon" type="image/png" href="https://ckeditor.com/assets/images/favicons/152x152.png" sizes="152x152">
-		<link rel="apple-touch-icon" type="image/png" href="https://ckeditor.com/assets/images/favicons/167x167.png" sizes="167x167">
-		<link rel="apple-touch-icon" type="image/png" href="https://ckeditor.com/assets/images/favicons/180x180.png" sizes="180x180">
-		<link rel="stylesheet" href="./style.css">
-		<link rel="stylesheet" href="./ckeditor5/ckeditor5.css">
 
-@endsection
 @section('main')
 <main class="pt-90">
     <div class="mb-4 pb-4"></div>
     <section class="contact-us container">
-      <div class="mw-930">
-        <h2 class="page-title">Liên hệ</h2>
-      </div>
+        <div class="mw-930">
+            <h2 class="page-header">Liên hệ với chúng tôi</h2>
+        </div>
     </section>
 
-    <hr class="mt-2 text-secondary " />
+    <hr class="mt-2 text-secondary" />
     <div class="mb-4 pb-4"></div>
 
     <section class="contact-us container">
-      <div class="mw-930">
-        <div class="contact-us__form">
-          <form name="contact-us-form" class="needs-validation" novalidate="" method="POST" action="/addContact">
-            @csrf
-            <h3 class="mb-5">Thông tin liên hệ</h3>
-            <div class="form-floating my-4">
-              <input type="text" class="form-control " name="name" placeholder="Name *"  >
-              <label for="contact_us_name">Name: *</label>
-              <span class="text-danger">
-                @error('name')
-                    {{ $message }}
-                @enderror
-              </span>
+        <div class="mw-930">
+            <div class="contact-us__form">
+                
+                {{-- Hiển thị thông báo khi gửi thành công (nếu không dùng redirect về trang chủ) --}}
+                @if(session('success'))
+                    <div class="alert alert-success" style="color: green; background: #e9f7ef; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                        <i class="fa fa-check-circle"></i> {{ session('success') }}
+                    </div>
+                @endif
+
+                {{-- Hiển thị lỗi Validation nếu có --}}
+                @if ($errors->any())
+                    <div class="alert alert-danger" style="color: #721c24; background-color: #f8d7da; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+                        <ul style="margin-bottom: 0;">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                {{-- SỬA ĐỔI QUAN TRỌNG TẠI ĐÂY: action gọi theo route name --}}
+                <form id="contactForm" method="POST" action="{{ route('contact.send') }}">
+                    @csrf
+                    <h3 class="mb-5">Gửi tin nhắn cho chúng tôi</h3>
+                    
+                    <div class="form-floating my-4">
+                        <input type="text" class="form-control" name="name" id="name" placeholder="Họ tên *" value="{{ old('name') }}" required>
+                        <label for="name">Họ và Tên: *</label>
+                    </div>
+
+                    <div class="form-floating my-4">
+                        <input type="text" class="form-control" name="phone" id="phone" placeholder="Số điện thoại *" value="{{ old('phone') }}" required>
+                        <label for="phone">Số điện thoại: *</label>
+                    </div>
+
+                    <div class="form-floating my-4">
+                        <input type="email" class="form-control" name="email" id="email" placeholder="Email *" value="{{ old('email') }}" required>
+                        <label for="email">Email: *</label>
+                    </div>
+
+                    <div class="form-floating my-4">
+                        <input type="text" class="form-control" name="title" id="title" placeholder="Tiêu đề *" value="{{ old('title') }}" required>
+                        <label for="title">Tiêu đề: *</label>
+                    </div>
+
+                    <div class="my-4">
+                        <label class="mb-2" style="font-weight: bold;">Nội dung liên hệ: *</label>
+                        <textarea class="form-control" name="content" id="editor" rows="8">{{ old('content') }}</textarea>
+                    </div>
+
+                    <div class="my-4">
+                        <button type="submit" class="btn btn-primary" style="padding: 12px 40px; background: #1abc9c; border: none; color: white; font-weight: bold; text-transform: uppercase;">
+                            GỬI TIN NHẮN
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="form-floating my-4">
-              <input type="text" class="form-control " name="phone" placeholder="Phone *" >
-              <label for="contact_us_name">Phone:*</label>
-              <span class="text-danger">
-                 @error('phone')
-                    {{ $message }}
-                @enderror
-              </span>
-            </div>
-            <div class="form-floating my-4">
-              <input type="email" class="form-control " name="email" placeholder="Email address *" >
-              <label for="contact_us_name">Email: *</label>
-              <span class="text-danger">
-                 @error('email')
-                    {{ $message }}
-                @enderror
-              </span>
-            </div>
-            <div class="form-floating my-4">
-              <input type="text" class="form-control " name="title" placeholder="Title *" >
-              <label for="contact_us_name">Title: *</label>
-              <span class="text-danger">
-                 @error('title')
-                    {{ $message }}
-                @enderror
-              </span>
-            </div>
-            <div class="my-4">
-              <textarea class="form-control form-control_gray " name="content" placeholder="Note" cols="100"
-                rows="8"  id="editor"></textarea>
-              <span class="text-danger">
-                 @error('content')
-                    {{ $message }}
-                @enderror
-              </span>
-            </div>
-            <div class="my-4">
-              <button type="submit">Send</button>
-            </div>
-          </form>
         </div>
-      </div>
     </section>
-  </main>
+</main>
 @endsection
 
 @section('js')
-<script type="importmap">
-		{
-			"imports": {
-				"ckeditor5": "./ckeditor5/ckeditor5.js",
-				"ckeditor5/": "./ckeditor5/"
-			}
-		}
+{{-- CKEditor 5 CDN --}}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+<script>
+    let editorInstance;
+    
+    ClassicEditor
+        .create(document.querySelector('#editor'), {
+            placeholder: 'Nhập nội dung chi tiết tại đây...'
+        })
+        .then(editor => { 
+            editorInstance = editor; 
+        })
+        .catch(error => { 
+            console.error('Lỗi CKEditor:', error); 
+        });
 
-		</script>
-        <script type="module" src="./main.js"></script>
+    // Xử lý trước khi submit form
+    document.getElementById('contactForm').onsubmit = function(e) {
+        if(editorInstance) {
+            const data = editorInstance.getData();
+            // Nếu CKEditor trống, báo lỗi ngay tại client (tùy chọn)
+            if(data.trim() === '') {
+                alert('Vui lòng nhập nội dung liên hệ!');
+                e.preventDefault();
+                return false;
+            }
+            // Gán dữ liệu vào textarea thực tế
+            document.querySelector('#editor').value = data;
+        }
+    };
+</script>
+
 @endsection
-
