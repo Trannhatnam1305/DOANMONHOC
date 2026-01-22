@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="{{ asset('css/admin/addProduct.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+   
+  
 <body>
     <form action="/admin/addsanpham" method="post" enctype="multipart/form-data">
         @csrf
@@ -18,28 +20,42 @@
                 <input type="text" id="name" name="name" value="{{ old('name') }}" placeholder="VD: Dell XPS 13">
                 @error('name') <small class="text-danger">{{ $message }}</small> @enderror
             </div>
-
             <div class="form-group">
                 <label for="price">Giá gốc (Tối đa 999.999.999):</label>
                 <input type="number" id="price" name="price" value="{{ old('price') }}" max="999999999">
                 @error('price') <small class="text-danger">{{ $message }}</small> @enderror
-            </div>
+                </div> 
 
             <div class="form-group">
                 <label for="discount_price">Giá Giảm:</label>
                 <input type="number" id="discount_price" name="discount_price" value="{{ old('discount_price', 0) }}" max="999999999">
             </div>
 
+
             <div class="form-group">
-                <label for="category_id">Loại Sản Phẩm (ID):</label>
-                <input type="number" id="category_id" name="category_id" value="{{ old('category_id') }}">
-                @error('category_id') <small class="text-danger">{{ $message }}</small> @enderror
+                <label for="category_id">Loại Sản Phẩm:</label>
+                <select id="category_id" name="category_id" class="form-control">
+                    <option value="">-- Chọn loại sản phẩm --</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
+                            {{ $cat->name }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('category_id') <small class="text-danger" style="color:red">{{ $message }}</small> @enderror
             </div>
 
             <div class="form-group">
-                <label for="brand_id">Thương Hiệu (ID):</label>
-                <input type="number" id="brand_id" name="brand_id" value="{{ old('brand_id') }}">
-                @error('brand_id') <small class="text-danger">{{ $message }}</small> @enderror
+                <label for="brand_id">Thương Hiệu:</label>
+                <select id="brand_id" name="brand_id" class="form-control">
+                    <option value="">-- Chọn thương hiệu --</option>
+                    @foreach($brands as $brand)
+                        <option value="{{ $brand->id }}" {{ old('brand_id') == $brand->id ? 'selected' : '' }}>
+                            {{ $brand->name }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('brand_id') <small class="text-danger" style="color:red">{{ $message }}</small> @enderror
             </div>
 
             <div class="form-group">
@@ -61,6 +77,20 @@
                 </select>
             </div>
 
+            <div class="form-group full-width">
+                <label for="supplier_id">Nhà Cung Cấp:</label>
+                <select name="supplier_id" id="supplier_id">
+                    <option value="">-- Chọn nhà cung cấp --</option>
+                    @foreach($suppliers as $sup)
+                        <option value="{{ $sup->id }}" {{ old('supplier_id') == $sup->id ? 'selected' : '' }}>
+                            {{ $sup->name }}
+                        </option>
+                    @endforeach
+                        </select>
+                        @error('supplier_id') 
+                            <small class="text-danger" style="color: red;">{{ $message }}</small> 
+                        @enderror
+            </div>
             <div class="form-group full-width">
                 <label for="description">Mô tả sản phẩm:</label>
                 <textarea id="description" name="description" rows="3">{{ old('description') }}</textarea>

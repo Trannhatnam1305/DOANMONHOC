@@ -115,25 +115,27 @@ class AdminController extends Controller
 
     public function AddProduct()
     {
-        #$category = DB::table('categories')->select('id', 'name')->get();
-        #$suppliers = DB::table('suppliers')->select('id', 'name')->get();
-        #$brands = DB::table('brands')->select('id', 'name')->get();
-        #return view('admin.addProduct', ['categories' => $category, 'suppliers' => $suppliers, 'brands' => $brands]);
-        return view('admin.addProduct');
+        $categories = DB::table('categories')->select('id', 'name')->get();
+        $suppliers = DB::table('suppliers')->select('id', 'name')->get();
+        $brands = DB::table('brands')->select('id', 'name')->get();
+
+        // compact sẽ tự hiểu là tạo mảng với key giống tên biến
+        return view('admin.addProduct', compact('categories', 'suppliers', 'brands'));
     }
 
     public function ThemSanPham(Request $request)
     {
-        // 1. Ràng buộc không được để trống (ngoại trừ discount_price)
+        // 1. Ràng buộc dữ liệu
         $request->validate([
             'name' => 'required|max:255',
             'price' => 'required|numeric',
             'description' => 'required',
             'category_id' => 'required|integer',
             'brand_id' => 'required|integer',
-            'loai' => 'required|integer',
+            'supplier_id' => 'required|integer', // ĐÃ SỬA: Phải là required
+            'loai' => 'required',
             'tags' => 'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Bắt buộc chọn ảnh khi thêm mới
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ], [
             'required' => ':attribute không được để trống.',
             'numeric' => ':attribute phải là con số.',
@@ -145,7 +147,9 @@ class AdminController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads'), $fileName);
+            // Nên lưu vào storage/app/public/products để đồng bộ với Seeder trước đó
+            $file->move(public_path('storage/products'), $fileName);
+            $dbPath = 'products/' . $fileName; // Lưu đường dẫn này vào DB
         }
 
         // 3. Insert dữ liệu
@@ -154,9 +158,10 @@ class AdminController extends Controller
             'price' => $request->price,
             'discount_price' => $request->discount_price ?? 0,
             'description' => $request->description,
-            'image' => $fileName,
+            'image' => $dbPath ?? 'products/no-image.png',
             'category_id' => $request->category_id,
             'brand_id' => $request->brand_id,
+            'supplier_id' => $request->supplier_id, // ĐÃ THÊM: Quan trọng nhất
             'loai' => $request->loai,
             'tags' => $request->tags,
             'status' => $request->status ?? 1,
@@ -355,6 +360,12 @@ class AdminController extends Controller
 
         $action = $user->status ? 'Mở khóa' : 'Khóa';
         return redirect()->back()->with('status', "Đã $action tài khoản {$user->username} thành công!");
+    }
+    // Thêm hàm này vào nếu chưa có
+    public function NhaCungCap()
+    {
+       $dsNhacungcap = DB::table('suppliers')->get();
+        return view('admin.NhaCungCapAdmin', compact('dsNhacungcap'));
     }
 }
 
