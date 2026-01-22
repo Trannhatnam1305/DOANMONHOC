@@ -315,6 +315,20 @@
                         <li>
                             <a href="{{route('admin.socials')}}"><i class="fa fa-home fa-fw"></i>Mạng Xã Hội </a>
                         </li>
+                        <li>
+                            <a href="{{ route('admin.contact') }}">
+                                <i class="fa fa-envelope fa-fw"></i> QUẢN LÝ LIÊN HỆ 
+                                @php
+                                    // (Tùy chọn) Đếm số tin nhắn chưa đọc để hiện thông báo số lượng
+                                    $newContacts = \App\Models\Contact::where('status', 0)->count();
+                                @endphp
+                                @if($newContacts > 0)
+                                    <span class="pull-right-container">
+                                        <small class="label pull-right bg-red">{{ $newContacts }}</small>
+                                    </span>
+                                @endif
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <!-- /.sidebar-collapse -->

@@ -51,27 +51,34 @@
 
                             {{-- 4. Logic Đăng nhập / Đăng xuất --}}
                             @if(Auth::check())
-                                {{-- NẾU ĐÃ ĐĂNG NHẬP --}}
+                                        {{-- HIỂN THỊ KHI ĐÃ ĐĂNG NHẬP --}}
+                                        <li>
+                                            {{-- Khớp với tên route đã đặt ở WebController --}}
+                                            <a href="{{ route('user.profile.edit') }}">
+                                                <i class="fa fa-user"></i> 
+                                                {{-- Ưu tiên hiển thị tên, nếu không có username thì dùng email hoặc name --}}
+                                                Xin chào, {{ Auth::user()->username ?? Auth::user()->name }}
+                                            </a>
+                                        </li>
 
-                                <li>
-                                    <a href="#">
-                                        <i class="fa fa-user"></i>
-                                        {{-- SỬA Ở ĐÂY: Dùng 'username' thay vì 'name' --}}
-                                        {{ Auth::user()->username }}
-                                    </a>
-                                </li>
-
-                                {{-- Nút Đăng xuất màu đỏ --}}
-                                <li>
-                                    <a href="{{ route('logout') }}" style="color: red; font-weight: bold;">
-                                        <i class="fa fa-sign-out"></i> Đăng xuất
-                                    </a>
-                                </li>
-                            @else
-                                {{-- NẾU CHƯA ĐĂNG NHẬP --}}
-                                <li><a href="/login"><i class="fa fa-user"></i> Đăng nhập</a></li>
-                                <li><a href="/signup"><i class="fa fa-user-plus"></i> Đăng ký</a></li>
-                            @endif
+                                        <li>
+                                            {{-- Nút Đăng xuất --}}
+                                            <a href="{{ route('logout') }}" 
+                                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                                            style="color: #ff4d4d; font-weight: bold;">
+                                                <i class="fa fa-sign-out"></i> Đăng xuất
+                                            </a>
+                                            
+                                            {{-- Form ẩn để đăng xuất an toàn bằng phương thức POST --}}
+                                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                                @csrf
+                                            </form>
+                                        </li>
+                                    @else
+                                        {{-- HIỂN THỊ KHI CHƯA ĐĂNG NHẬP --}}
+                                        <li><a href="{{ route('login') }}"><i class="fa fa-unlock-alt"></i> Đăng nhập</a></li>
+                                        <li><a href="{{ route('register') }}"><i class="fa fa-user-plus"></i> Đăng ký</a></li>
+                                    @endif
                         </ul>
                     </div>
                 </div>

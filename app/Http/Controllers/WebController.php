@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Contact;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
@@ -152,10 +153,11 @@ class WebController extends Controller
         // 3. Nếu đăng nhập thất bại (Sai username hoặc password)
         return redirect()->back()->with('error', 'Tên đăng nhập hoặc mật khẩu không đúng!');
     }
-    public function logout(Request $request)
-    {
-        \Auth::logout();
-        return redirect('/')->with('status', 'Đã đăng xuất!');
+    public function logout(Request $request) {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/');
     }
     public function postSignup(Request $request)
     {
@@ -223,6 +225,70 @@ class WebController extends Controller
     {
         return view('user.checkout'); // Tạo file checkout.blade.php trống để hết lỗi
     }
+
+   public function editProfile()
+    {
+        $user = Auth::user();
+        // Phải có chữ return ở đây!
+        return view('user.profile', compact('user')); 
+    }
+
+    
+    public function updateProfile(Request $request)
+        {
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+
+            // 1. Kiểm tra dữ liệu đầu vào
+            $request->validate([
+                'name'     => 'required|string|max:255',
+                'email'    => 'required|email|unique:users,email,' . $user->id,
+                'phone'    => 'nullable|string|max:15',
+                'birthday' => 'nullable|date',
+                'gender'   => 'nullable|in:0,1,2',
+                'address'  => 'nullable|string|max:500',
+                'password' => 'nullable|string|min:8',
+            ], [
+                'name.required' => 'Họ tên không được để trống.',
+                'email.unique'  => 'Email này đã tồn tại trong hệ thống.',
+                'password.min'  => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
+            ]);
+            // 2. Cập nhật các trường dữ liệu
+            $user->name     = $request->name;
+            $user->email    = $request->email;
+            $user->phone    = $request->phone;
+            $user->birthday = $request->birthday;
+            $user->gender   = $request->gender;
+            $user->address  = $request->address;
+            // 3. Kiểm tra và đổi mật khẩu nếu có nhập
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->password);
+            }
+            // 4. Lưu vào Database
+            $user->save();
+            // 5. Quay lại trang cũ kèm thông báo thành công
+            return redirect()->back()->with('success', 'Thông tin cá nhân đã được cập nhật thành công!');
+        }
+
+            public function sendContact(Request $request) {
+            // 1. Kiểm tra dữ liệu
+            $request->validate([
+                'name'    => 'required',
+                'email'   => 'required|email',
+                'phone'   => 'required',
+                'title'   => 'required',
+                'content' => 'required',
+            ]);
+
+            // 2. Thực hiện lưu vào DB
+            \App\Models\Contact::create($request->all());
+
+            // 3. ĐÂY LÀ DÒNG GÂY LỖI NẾU VIẾT SAI:
+            // SAI: return view('viewContact');  <-- Laravel sẽ đi tìm file viewContact.blade.php
+            // ĐÚNG: Quay về trang chủ
+            return redirect('/')->with('success', 'Gửi liên hệ thành công!');
+        }
+        
 
 }
 ;
