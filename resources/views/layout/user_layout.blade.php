@@ -20,9 +20,9 @@
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/owl.carousel.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="{{ asset('css/owl.carousel.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/responsive.css') }}">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -33,7 +33,6 @@
 </head>
 
 <body>
-
     <div class="header-area">
         <div class="container">
             <div class="row">
@@ -128,6 +127,8 @@
                         <li><a href="#">Danh mục</a></li>
 
                         <li><a href="/contact">liên hệ</a></li>
+
+                        <li><a href="/blog">Blog</a></li>
                     </ul>
                 </div>
             </div>
@@ -141,11 +142,9 @@
                 <div class="col-md-3 col-sm-6">
                     <div class="footer-about-us">
                         <h2>e<span>Electronics</span></h2>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis sunt id doloribus vero
-                            quam laborum quas alias dolores blanditiis iusto consequatur, modi aliquid eveniet eligendi
-                            iure eaque ipsam iste, pariatur omnis sint! Suscipit, debitis, quisquam. Laborum commodi
-                            veritatis magni at?</p>
+                        <p>Chuyên cung cấp các thiết bị điện tử chính hãng với giá cả cạnh tranh nhất thị trường.</p>
                         <div class="footer-social">
+                            {{-- Lấy link từ bảng settings thông qua biến $socials --}}
                             <a href="{{ $socials['facebook'] ?? '#' }}" target="_blank"><i class="fa fa-facebook"></i></a>
                             <a href="{{ $socials['twitter'] ?? '#' }}" target="_blank"><i class="fa fa-twitter"></i></a>
                             <a href="{{ $socials['youtube'] ?? '#' }}" target="_blank"><i class="fa fa-youtube"></i></a>
@@ -157,60 +156,50 @@
 
                 <div class="col-md-3 col-sm-6">
                     <div class="footer-menu">
-                        <h2 class="footer-wid-title">User Navigation </h2>
+                        <h2 class="footer-wid-title">Người dùng</h2>
                         <ul>
-                            <li><a href="#">My account</a></li>
-                            <li><a href="#">Order history</a></li>
-                            <li><a href="#">Wishlist</a></li>
-                            <li><a href="#">Vendor contact</a></li>
-                            <li><a href="#">Front page</a></li>
+                            <li><a href="#">Tài khoản của tôi</a></li>
+                            <li><a href="#">Lịch sử đơn hàng</a></li>
+                            <li><a href="#">Danh sách yêu thích</a></li>
                         </ul>
                     </div>
                 </div>
 
                 <div class="col-md-3 col-sm-6">
                     <div class="footer-menu">
-                        <h2 class="footer-wid-title">Categories</h2>
+                        <h2 class="footer-wid-title">Danh mục</h2>
                         <ul>
-                            <li><a href="#">Mobile Phone</a></li>
-                            <li><a href="#">Home accesseries</a></li>
-                            <li><a href="#">LED TV</a></li>
-                            <li><a href="#">Computer</a></li>
-                            <li><a href="#">Gadets</a></li>
+                            <li><a href="#">Điện thoại</a></li>
+                            <li><a href="#">Máy tính bảng</a></li>
+                            <li><a href="#">Laptop</a></li>
                         </ul>
                     </div>
                 </div>
 
                 <div class="col-md-3 col-sm-6">
                     <div class="footer-newsletter">
-                        <h2 class="footer-wid-title">Newsletter</h2>
-                        <p>Sign up to our newsletter and get exclusive deals you wont find anywhere else straight to
-                            your inbox!</p>
+                        <h2 class="footer-wid-title">Bản tin</h2>
+                        <p>Đăng ký để nhận những thông báo khuyến mãi mới nhất từ chúng tôi!</p>
                         <div class="newsletter-form">
                             <form action="#">
-                                <input type="email" placeholder="Type your email">
-                                <input type="submit" value="Subscribe">
+                                <input type="email" placeholder="Nhập email của bạn">
+                                <input type="submit" value="Đăng ký">
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div> <!-- End footer top area -->
-
-    <div class="footer-bottom-area">
+    </div> <div class="footer-bottom-area">
         <div class="container">
             <div class="row">
                 <div class="col-md-8">
                     <div class="copyright">
-                        <p>&copy; 2015 eElectronics. All Rights Reserved. Coded with <i class="fa fa-heart"></i> by <a
-                                href="http://wpexpand.com" target="_blank">WP Expand</a></p>
+                        <p>&copy; 2026 eElectronics. All Rights Reserved.</p>
                     </div>
                 </div>
-
                 <div class="col-md-4">
                     <div class="footer-card-icon">
-                        <i class="fa fa-cc-discover"></i>
                         <i class="fa fa-cc-mastercard"></i>
                         <i class="fa fa-cc-paypal"></i>
                         <i class="fa fa-cc-visa"></i>
@@ -220,22 +209,18 @@
         </div>
     </div> <!-- End footer bottom area -->
 
-    <!-- Latest jQuery form server -->
     <script src="https://code.jquery.com/jquery.min.js"></script>
 
-    <!-- Bootstrap JS form CDN -->
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
-    <!-- jQuery sticky menu -->
-    <script src="js/owl.carousel.min.js"></script>
-    <script src="js/jquery.sticky.js"></script>
+    {{-- SỬA LẠI CÁC DÒNG NÀY --}}
+    <script src="{{ asset('js/owl.carousel.min.js') }}"></script>
+    <script src="{{ asset('js/jquery.sticky.js') }}"></script>
 
-    <!-- jQuery easing -->
-    <script src="js/jquery.easing.1.3.min.js"></script>
+    <script src="{{ asset('js/jquery.easing.1.3.min.js') }}"></script>
 
-    <!-- Main Script -->
-    <script src="js/main.js"></script>
-    <!--------------------------------------------->
+    <script src="{{ asset('js/main.js') }}"></script>
+    
     @yield('js')
 </body>
 

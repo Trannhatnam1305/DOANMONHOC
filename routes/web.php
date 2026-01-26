@@ -29,6 +29,10 @@ Route::get('/contact', [WebController::class, 'contact']);
 
 // Route xem trang giỏ hàng
 Route::get('/cart', [WebController::class, 'cart'])->name('cart');
+// Route xem trang giới thiệu
+Route::get('/blog', [WebController::class, 'blog'])->name('blog');
+// Route xem chi tiết bài viết, nhận vào tham số {id}
+Route::get('/blog/{id}', [App\Http\Controllers\WebController::class, 'blogDetail'])->name('blog.detail');
 // Route thêm sản phẩm vào giỏ (nhận ID sản phẩm)
 Route::get('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
 // Route xóa sản phẩm khỏi giỏ hàng

@@ -1,4 +1,4 @@
-@extends('layout.client_layout')
+@extends('layout.user_layout')
 @section('main')
 <div class="slider-area">
     <div id="slide-list" class="carousel carousel-fade slide" data-ride="carousel" data-interval="5000">
@@ -120,7 +120,7 @@
             <div class="col-md-4">
                 <div class="single-product-widget">
                     <h2 class="product-wid-title">Top New</h2>
-                    <a href="/shop" class="wid-view-more">View All</a>
+                    <a href="/blog" class="wid-view-more">View All</a>
 
                     @foreach ($products_top_new as $product_top_new)
                         <div class="single-wid-product">

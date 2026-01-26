@@ -11,34 +11,34 @@ use Illuminate\Support\Facades\Auth;
 class WebController extends Controller
 {
     public function cart()
-        {
-            // 1. Lấy dữ liệu giỏ hàng từ session
-            $cart = session()->get('cart', []);
+    {
+        // 1. Lấy dữ liệu giỏ hàng từ session
+        $cart = session()->get('cart', []);
 
-            // 2. Sidebar Products - Chỉ lấy những sản phẩm đang được BẬT (status = 1)
-            $products_sidebar = DB::table('products')
-                ->where('status', 1) // Thêm điều kiện này
-                ->inRandomOrder()
-                ->limit(8)
-                ->get();
+        // 2. Sidebar Products - Chỉ lấy những sản phẩm đang được BẬT (status = 1)
+        $products_sidebar = DB::table('products')
+            ->where('status', 1) // Thêm điều kiện này
+            ->inRandomOrder()
+            ->limit(8)
+            ->get();
 
-            // 3. You may be interested in - Chỉ lấy sản phẩm đang BẬT
-            $products_interested = DB::table('products')
-                ->where('status', 1) // Thêm điều kiện này
-                ->inRandomOrder()
-                ->limit(4)
-                ->get();
+        // 3. You may be interested in - Chỉ lấy sản phẩm đang BẬT
+        $products_interested = DB::table('products')
+            ->where('status', 1) // Thêm điều kiện này
+            ->inRandomOrder()
+            ->limit(4)
+            ->get();
 
-            // 4. Recent Posts - Lấy 5 sản phẩm mới nhất và đang BẬT
-            $recent_posts = DB::table('products')
-                ->where('status', 1) // Thêm điều kiện này
-                ->orderBy('id', 'desc')
-                ->limit(5)
-                ->get();
+        // 4. Recent Posts - Lấy 5 sản phẩm mới nhất và đang BẬT
+        $recent_posts = DB::table('products')
+            ->where('status', 1) // Thêm điều kiện này
+            ->orderBy('id', 'desc')
+            ->limit(5)
+            ->get();
 
-            // 5. Trả về view với tất cả các biến đã lọc
-            return view('user.cart', compact('cart', 'products_sidebar', 'products_interested', 'recent_posts'));
-        }
+        // 5. Trả về view với tất cả các biến đã lọc
+        return view('user.cart', compact('cart', 'products_sidebar', 'products_interested', 'recent_posts'));
+    }
 
     public function addToCart($id)
     {
@@ -89,16 +89,16 @@ class WebController extends Controller
             'products_seller' => $products_seller,
             'products_recently_view' => $products_recently_view,
             'products_top_new' => $products_top_new,
-            'socials' => $socials, 
+            'socials' => $socials,
         ]);
     }
     public function shop()
     {
-        
+
         $products = DB::table('products')
-                    ->where('status', 1)
-                    ->orderBy('id', 'desc')
-                    ->paginate(12); 
+            ->where('status', 1)
+            ->orderBy('id', 'desc')
+            ->paginate(12);
 
         return view("user.shop", compact('products'));
     }
@@ -153,7 +153,8 @@ class WebController extends Controller
         // 3. Nếu đăng nhập thất bại (Sai username hoặc password)
         return redirect()->back()->with('error', 'Tên đăng nhập hoặc mật khẩu không đúng!');
     }
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -203,17 +204,17 @@ class WebController extends Controller
         $cart = session()->get('cart');
 
         // 2. Kiểm tra xem sản phẩm có tồn tại trong giỏ không
-        if(isset($cart[$id])) {
-            if($type == 'plus') {
+        if (isset($cart[$id])) {
+            if ($type == 'plus') {
                 // Tăng số lượng
                 $cart[$id]['quantity']++;
-            } elseif($type == 'minus') {
+            } elseif ($type == 'minus') {
                 // Giảm số lượng nhưng không được nhỏ hơn 1
-                if($cart[$id]['quantity'] > 1) {
+                if ($cart[$id]['quantity'] > 1) {
                     $cart[$id]['quantity']--;
                 }
             }
-            
+
             // 3. Lưu lại giỏ hàng mới vào session
             session()->put('cart', $cart);
         }
@@ -226,70 +227,109 @@ class WebController extends Controller
         return view('user.checkout'); // Tạo file checkout.blade.php trống để hết lỗi
     }
 
-   public function editProfile()
+    public function editProfile()
     {
         $user = Auth::user();
         // Phải có chữ return ở đây!
-        return view('user.profile', compact('user')); 
+        return view('user.profile', compact('user'));
     }
 
-    
+
     public function updateProfile(Request $request)
-        {
-            /** @var \App\Models\User $user */
-            $user = Auth::user();
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-            // 1. Kiểm tra dữ liệu đầu vào
-            $request->validate([
-                'name'     => 'required|string|max:255',
-                'email'    => 'required|email|unique:users,email,' . $user->id,
-                'phone'    => 'nullable|string|max:15',
-                'birthday' => 'nullable|date',
-                'gender'   => 'nullable|in:0,1,2',
-                'address'  => 'nullable|string|max:500',
-                'password' => 'nullable|string|min:8',
-            ], [
-                'name.required' => 'Họ tên không được để trống.',
-                'email.unique'  => 'Email này đã tồn tại trong hệ thống.',
-                'password.min'  => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
-            ]);
-            // 2. Cập nhật các trường dữ liệu
-            $user->name     = $request->name;
-            $user->email    = $request->email;
-            $user->phone    = $request->phone;
-            $user->birthday = $request->birthday;
-            $user->gender   = $request->gender;
-            $user->address  = $request->address;
-            // 3. Kiểm tra và đổi mật khẩu nếu có nhập
-            if ($request->filled('password')) {
-                $user->password = Hash::make($request->password);
+        // 1. Kiểm tra dữ liệu đầu vào
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:15',
+            'birthday' => 'nullable|date',
+            'gender' => 'nullable|in:0,1,2',
+            'address' => 'nullable|string|max:500',
+            'password' => 'nullable|string|min:8',
+        ], [
+            'name.required' => 'Họ tên không được để trống.',
+            'email.unique' => 'Email này đã tồn tại trong hệ thống.',
+            'password.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
+        ]);
+        // 2. Cập nhật các trường dữ liệu
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->phone = $request->phone;
+        $user->birthday = $request->birthday;
+        $user->gender = $request->gender;
+        $user->address = $request->address;
+        // 3. Kiểm tra và đổi mật khẩu nếu có nhập
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+        // 4. Lưu vào Database
+        $user->save();
+        // 5. Quay lại trang cũ kèm thông báo thành công
+        return redirect()->back()->with('success', 'Thông tin cá nhân đã được cập nhật thành công!');
+    }
+
+    public function sendContact(Request $request)
+    {
+        // 1. Kiểm tra dữ liệu
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+            'phone' => 'required',
+            'title' => 'required',
+            'content' => 'required',
+        ]);
+
+        // 2. Thực hiện lưu vào DB
+        \App\Models\Contact::create($request->all());
+
+        // 3. ĐÂY LÀ DÒNG GÂY LỖI NẾU VIẾT SAI:
+        // SAI: return view('viewContact');  <-- Laravel sẽ đi tìm file viewContact.blade.php
+        // ĐÚNG: Quay về trang chủ
+        return redirect('/')->with('success', 'Gửi liên hệ thành công!');
+    }
+    public function blog()
+    {
+        // 1. Giả lập dữ liệu danh sách bài viết (Sau này bạn lấy từ Database thì thay đoạn này)
+        $list_posts = [
+            ['id' => 1, 'title' => 'Cách chọn mua laptop phù hợp cho sinh viên', 'image' => 'post1.jpg'],
+            ['id' => 2, 'title' => 'Top 5 điện thoại chụp ảnh đẹp nhất 2024', 'image' => 'post2.jpg'],
+            ['id' => 3, 'title' => 'Hướng dẫn bảo quản đồ điện tử bền lâu', 'image' => 'post3.jpg'],
+            ['id' => 4, 'title' => 'Khuyến mãi mùa hè: Giảm giá sốc 50%', 'image' => 'post4.jpg'],
+        ];
+
+        // 2. Trả về giao diện blog và truyền biến $list_posts sang
+        return view('user.blog', compact('list_posts'));
+    }
+    public function blogDetail($id)
+    {
+        // 1. Danh sách dữ liệu (Giống hệt hàm blog)
+        $list_posts = [
+            ['id' => 1, 'title' => 'Cách chọn mua laptop phù hợp cho sinh viên', 'image' => 'post1.jpg'],
+            ['id' => 2, 'title' => 'Top 5 điện thoại chụp ảnh đẹp nhất 2024', 'image' => 'post2.jpg'],
+            ['id' => 3, 'title' => 'Hướng dẫn bảo quản đồ điện tử bền lâu', 'image' => 'post3.jpg'],
+            ['id' => 4, 'title' => 'Khuyến mãi mùa hè: Giảm giá sốc 50%', 'image' => 'post4.jpg'],
+        ];
+
+        // 2. Tìm bài viết có id trùng với id người dùng bấm
+        $current_post = null;
+        foreach($list_posts as $post) {
+            if($post['id'] == $id) {
+                $current_post = $post;
+                break;
             }
-            // 4. Lưu vào Database
-            $user->save();
-            // 5. Quay lại trang cũ kèm thông báo thành công
-            return redirect()->back()->with('success', 'Thông tin cá nhân đã được cập nhật thành công!');
         }
 
-            public function sendContact(Request $request) {
-            // 1. Kiểm tra dữ liệu
-            $request->validate([
-                'name'    => 'required',
-                'email'   => 'required|email',
-                'phone'   => 'required',
-                'title'   => 'required',
-                'content' => 'required',
-            ]);
-
-            // 2. Thực hiện lưu vào DB
-            \App\Models\Contact::create($request->all());
-
-            // 3. ĐÂY LÀ DÒNG GÂY LỖI NẾU VIẾT SAI:
-            // SAI: return view('viewContact');  <-- Laravel sẽ đi tìm file viewContact.blade.php
-            // ĐÚNG: Quay về trang chủ
-            return redirect('/')->with('success', 'Gửi liên hệ thành công!');
+        // 3. Nếu không tìm thấy bài viết thì báo lỗi 404
+        if(!$current_post) {
+            abort(404); 
         }
-        
 
-}
-;
+        // 4. Trả về giao diện chi tiết
+        return view('user.blog_detail', compact('current_post', 'list_posts'));
+    }
+
+};
 
