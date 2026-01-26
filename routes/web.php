@@ -27,19 +27,15 @@ Route::get('/single-product', [WebController::class, 'singleproduct']);
 //Route Trang Contact
 Route::get('/contact', [WebController::class, 'contact']);
 
-// Route xem trang giỏ hàng
-Route::get('/cart', [WebController::class, 'cart'])->name('cart');
-// Route thêm sản phẩm vào giỏ (nhận ID sản phẩm)
-Route::get('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
-// Route xóa sản phẩm khỏi giỏ hàng
-Route::get('/delete-cart/{id}', [WebController::class, 'deleteCart'])->name('delete_cart');
-// Thêm ->name('product_detail') vào cuối route của bạn
-Route::get('/san-pham/{id}', [WebController::class, 'show'])->name('product_detail');
-// Route xử lý tăng giảm số lượng
 Route::get('/cart', [WebController::class, 'cart'])->name('cart');
 Route::get('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
+Route::post('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
 Route::get('/delete-cart/{id}', [WebController::class, 'deleteCart'])->name('delete_cart');
 Route::get('/update-cart-quantity/{id}/{type}', [WebController::class, 'updateQuantity'])->name('update_cart_quantity');
+Route::get('/product/{id}', [WebController::class, 'show'])->name('product_detail');
+Route::get('/get-stock/{id}', [WebController::class, 'getStockQuantity'])->name('get_stock_quantity');
+// Tìm kiếm
+Route::get('/search', [WebController::class, 'search'])->name('search');
 Route::get('/checkout', [WebController::class, 'checkout'])->name('checkout');
 Route::get('/profile', [WebController::class, 'editProfile'])->name('user.profile.edit');    
 Route::post('/profile/update', [WebController::class, 'updateProfile'])->name('user.profile.update');

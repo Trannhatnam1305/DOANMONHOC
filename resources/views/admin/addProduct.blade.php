@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
    
-  
 <body>
     <form action="/admin/addsanpham" method="post" enctype="multipart/form-data">
         @csrf
@@ -20,17 +19,23 @@
                 <input type="text" id="name" name="name" value="{{ old('name') }}" placeholder="VD: Dell XPS 13">
                 @error('name') <small class="text-danger">{{ $message }}</small> @enderror
             </div>
+
             <div class="form-group">
                 <label for="price">Giá gốc (Tối đa 999.999.999):</label>
                 <input type="number" id="price" name="price" value="{{ old('price') }}" max="999999999">
                 @error('price') <small class="text-danger">{{ $message }}</small> @enderror
-                </div> 
+            </div> 
 
             <div class="form-group">
                 <label for="discount_price">Giá Giảm:</label>
                 <input type="number" id="discount_price" name="discount_price" value="{{ old('discount_price', 0) }}" max="999999999">
             </div>
 
+            <div class="form-group">
+                <label for="stock_quantity">Số lượng nhập kho :</label>
+                <input type="number" id="stock_quantity" name="stock_quantity" value="{{ old('stock_quantity', 0) }}" min="0" placeholder="Số lượng thực tế">
+                @error('stock_quantity') <small class="text-danger" style="color:red">{{ $message }}</small> @enderror
+            </div>
 
             <div class="form-group">
                 <label for="category_id">Loại Sản Phẩm:</label>
@@ -70,7 +75,7 @@
             </div>
 
             <div class="form-group">
-                <label for="status">Trạng Thái:</label>
+                <label for="status">Trạng Thái hiển thị:</label>
                 <select name="status">
                     <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>Hiển thị trên web</option>
                     <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Ẩn sản phẩm</option>
@@ -86,11 +91,12 @@
                             {{ $sup->name }}
                         </option>
                     @endforeach
-                        </select>
-                        @error('supplier_id') 
-                            <small class="text-danger" style="color: red;">{{ $message }}</small> 
-                        @enderror
+                </select>
+                @error('supplier_id') 
+                    <small class="text-danger" style="color: red;">{{ $message }}</small> 
+                @enderror
             </div>
+
             <div class="form-group full-width">
                 <label for="description">Mô tả sản phẩm:</label>
                 <textarea id="description" name="description" rows="3">{{ old('description') }}</textarea>
