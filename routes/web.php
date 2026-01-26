@@ -33,7 +33,7 @@ Route::post('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add
 Route::get('/delete-cart/{id}', [WebController::class, 'deleteCart'])->name('delete_cart');
 Route::get('/update-cart-quantity/{id}/{type}', [WebController::class, 'updateQuantity'])->name('update_cart_quantity');
 Route::get('/product/{id}', [WebController::class, 'show'])->name('product_detail');
-
+Route::get('/get-stock/{id}', [WebController::class, 'getStockQuantity'])->name('get_stock_quantity');
 // Tìm kiếm
 Route::get('/search', [WebController::class, 'search'])->name('search');
 Route::get('/checkout', [WebController::class, 'checkout'])->name('checkout');

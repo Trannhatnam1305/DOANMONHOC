@@ -323,6 +323,12 @@ class WebController extends Controller
 
             return view('user.single-product', compact('product', 'relatedProducts'));
         }
+
+    public function getStockQuantity($id) 
+        {
+            $stock = DB::table('products')->where('id', $id)->value('stock_quantity');
+            return response()->json(['stock' => $stock ?? 0]);
+        }
                     
 
        

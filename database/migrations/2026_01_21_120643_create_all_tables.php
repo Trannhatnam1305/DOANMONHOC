@@ -70,8 +70,9 @@ return new class extends Migration
             $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('cascade');
             $table->string('loai')->nullable();
             $table->string('tags')->nullable();
+            $table->integer('stock_quantity')->default(0); 
             $table->integer('status')->default(1);
-            $table->integer('views')->default(0); // Phục vụ mục 17 (Lượt view)
+            $table->integer('views')->default(0); 
             $table->softDeletes();
             $table->timestamps();
         });

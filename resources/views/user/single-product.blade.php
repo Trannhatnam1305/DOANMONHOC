@@ -125,9 +125,24 @@
                                 </div>
 
                                 <div style="margin: 20px 0;">
-                                    <p><strong>Trạng thái:</strong> <span class="text-success">{{ $product->status == 1 ? 'Còn hàng' : 'Hết hàng' }}</span></p>
-                                    <p><strong>Lượt xem:</strong> {{ $product->views ?? 0 }} (Mục 17)</p>
-                                    <p><strong>Số lượng hiện có:</strong> {{ $product->stock_quantity ?? 'Liên hệ' }}</p>
+                                    {{-- Trạng thái: Dựa trên số lượng kho (stock_quantity) --}}
+                                    <p>
+                                        <strong>Trạng thái:</strong> 
+                                        <span id="product-status-text" class="{{ $product->stock_quantity > 0 ? 'text-success' : 'text-danger' }}" style="font-weight: bold;">
+                                            {{ $product->stock_quantity > 0 ? 'Còn hàng' : 'Hết hàng' }}
+                                        </span>
+                                    </p>
+
+                                    {{-- Lượt xem --}}
+                                    <p><strong>Lượt xem:</strong> {{ $product->views ?? 0 }}</p>
+
+                                    {{-- Số lượng hiện có: Hiển thị Realtime --}}
+                                    <p>
+                                        <strong>Số lượng hiện có:</strong> 
+                                        <span id="realtime-stock-quantity" style="font-weight: bold; color: #5a88ca;">
+                                            {{ $product->stock_quantity ?? 0 }}
+                                        </span> sản phẩm
+                                    </p>
                                 </div>
 
                                     <div class="add-to-cart-form" style="margin: 20px 0;">
@@ -189,4 +204,34 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    function fetchStockRealtime() {
+        $.ajax({
+            // Route này bạn cần tạo trong web.php để trả về số lượng kho hiện tại
+            url: "{{ route('get_stock_quantity', $product->id) }}",
+            type: "GET",
+            success: function(data) {
+                // 1. Cập nhật con số số lượng
+                $('#realtime-stock-quantity').text(data.stock);
+
+                // 2. Cập nhật trạng thái chữ (Còn hàng/Hết hàng)
+                let statusText = $('#product-status-text');
+                if (data.stock > 0) {
+                    statusText.text('Còn hàng').removeClass('text-danger').addClass('text-success');
+                    $('.add_to_cart_button').prop('disabled', false).text('Thêm vào giỏ').css('opacity', '1');
+                } else {
+                    statusText.text('Hết hàng').removeClass('text-success').addClass('text-danger');
+                    // Vô hiệu hóa nút mua nếu hết hàng
+                    $('.add_to_cart_button').prop('disabled', true).text('Tạm hết hàng').css('opacity', '0.6');
+                }
+            }
+        });
+    }
+
+    // Tự động cập nhật mỗi 10 giây
+    setInterval(fetchStockRealtime, 10000);
+</script>
 @endsection
+
