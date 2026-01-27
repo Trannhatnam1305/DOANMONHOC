@@ -15,42 +15,36 @@ class WebController extends Controller
 
     public function cart()
         {
-            // 1. Lấy dữ liệu giỏ hàng từ DATABASE thay vì Session
-            // Chúng ta JOIN với bảng products để lấy tên, ảnh và giá hiện tại
+            // 1. Khởi tạo biến mặc định
             $cart = [];
+            $totalAll = 0;
+
             if (Auth::check()) {
-                $cart = DB::table('carts')
+                // Query kết nối bảng carts và products để lấy dữ liệu realtime
+                $cartQuery = DB::table('carts')
                     ->join('products', 'carts.product_id', '=', 'products.id')
-                    ->where('carts.user_id', Auth::id())
-                    ->select('carts.*', 'products.name', 'products.image', 'products.price as current_product_price')
-                    ->get();
+                    ->where('carts.user_id', Auth::id());
+
+                // Tính tổng tiền cho TOÀN BỘ giỏ hàng (Không bị ảnh hưởng bởi phân trang)
+                $totalAll = (clone $cartQuery)->sum(DB::raw('carts.quantity * products.price'));
+
+                // Lấy dữ liệu và thực hiện phân trang (5 món/trang)
+                $cart = $cartQuery->select(
+                    'carts.*', 
+                    'products.name', 
+                    'products.image', 
+                    'products.price as current_product_price', // Đặt alias để View gọi được
+                    'products.stock_quantity' // Kiểm tra tồn kho realtime
+                )->paginate(3);
             }
 
-            // 2. Sidebar Products - Giữ nguyên logic của bạn
-            $products_sidebar = DB::table('products')
-                ->where('status', 1)
-                ->inRandomOrder()
-                ->limit(8)
-                ->get();
+            // 2. Các biến Sidebar giữ nguyên logic
+            $products_sidebar = DB::table('products')->where('status', 1)->inRandomOrder()->limit(8)->get();
+            $products_interested = DB::table('products')->where('status', 1)->inRandomOrder()->limit(4)->get();
+            $recent_posts = DB::table('products')->where('status', 1)->orderBy('id', 'desc')->limit(5)->get();
 
-            // 3. You may be interested in - Giữ nguyên logic của bạn
-            $products_interested = DB::table('products')
-                ->where('status', 1)
-                ->inRandomOrder()
-                ->limit(4)
-                ->get();
-
-            // 4. Recent Posts - Giữ nguyên logic của bạn
-            $recent_posts = DB::table('products')
-                ->where('status', 1)
-                ->orderBy('id', 'desc')
-                ->limit(5)
-                ->get();
-
-            // 5. Trả về view
-            return view('user.cart', compact('cart', 'products_sidebar', 'products_interested', 'recent_posts'));
+            return view('user.cart', compact('cart', 'totalAll', 'products_sidebar', 'products_interested', 'recent_posts'));
         }
-
     public function addToCart(Request $request, $id)
         {
             // 1. Phải đăng nhập mới lưu vào DB được
@@ -216,29 +210,39 @@ class WebController extends Controller
         }
     public function updateQuantity($id, $type)
         {
-            $cart = session()->get('cart');
+            // Tìm sản phẩm trong bảng carts theo ID của dòng đó
+            $cartItem = DB::table('carts')->where('id', $id)->first();
 
-            if(isset($cart[$id])) {
-                if($type == 'plus') {
-                    $cart[$id]['quantity']++;
-                } elseif($type == 'minus' && $cart[$id]['quantity'] > 1) {
-                    $cart[$id]['quantity']--;
+            if ($cartItem) {
+                $newQty = $cartItem->quantity;
+
+                if ($type == 'plus') {
+                    $newQty++;
+                } elseif ($type == 'minus' && $cartItem->quantity > 1) {
+                    $newQty--;
                 }
-                session()->put('cart', $cart);
+
+                // Cập nhật lại số lượng vào Database
+                DB::table('carts')->where('id', $id)->update(['quantity' => $newQty]);
+
+                // Tính toán lại tổng tiền của cả giỏ hàng (cho user hiện tại)
+                $cartItems = DB::table('carts')
+                    ->where('user_id', Auth::id())
+                    ->get();
+
+                $total = $cartItems->sum(function($item) {
+                    return $item->price * $item->quantity;
+                });
+
+                return response()->json([
+                    'status'   => 'success',
+                    'quantity' => $newQty,
+                    'subtotal' => number_format($cartItem->price * $newQty, 0, ',', '.') . ' VNĐ',
+                    'total'    => number_format($total, 0, ',', '.') . ' VNĐ'
+                ]);
             }
 
-            // Tính toán lại tổng tiền để gửi về cho giao diện
-            $total = 0;
-            foreach($cart as $item) {
-                $total += $item['price'] * $item['quantity'];
-            }
-
-            return response()->json([
-                'status'   => 'success',
-                'quantity' => $cart[$id]['quantity'],
-                'subtotal' => number_format($cart[$id]['price'] * $cart[$id]['quantity']) . 'đ',
-                'total'    => number_format($total) . 'đ'
-            ]);
+            return response()->json(['status' => 'error'], 404);
         }
     public function checkout()
         {

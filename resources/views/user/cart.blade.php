@@ -18,6 +18,7 @@
     <div class="zigzag-bottom"></div>
     <div class="container">
         <div class="row">
+            {{-- SIDEBAR --}}
             <div class="col-md-4">
                 <div class="single-sidebar">
                     <h2 class="sidebar-title">Products</h2>
@@ -44,11 +45,14 @@
                     <h2 class="sidebar-title">Sản phẩm gần đây</h2>
                     <ul>
                         @foreach($recent_posts as $post)
-                        <li><a href="{{ route('product_detail', $post->id) }}">{{ $post->name }}</a></li>
+                            <li><a href="{{ route('product_detail', $post->id) }}">{{ $post->name }}</a></li>
                         @endforeach
                     </ul>
                 </div>
-            </div> <div class="col-md-8">
+            </div> 
+
+            {{-- MAIN CONTENT --}}
+            <div class="col-md-8">
                 <div class="product-content-right">
                     <div class="woocommerce">
                         <form method="post" action="#">
@@ -65,18 +69,13 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {{-- Thay đổi cách duyệt vòng lặp --}}
-                                    @php $total = 0; @endphp
                                     @if(count($cart) > 0)
                                         @foreach($cart as $item)
                                             @php 
-                                                // Tính toán dựa trên thuộc tính của object
-                                                $subtotal = $item->price * $item->quantity; 
-                                                $total += $subtotal;
+                                                $subtotal = $item->current_product_price * $item->quantity; 
                                             @endphp
                                             <tr class="cart_item">
                                                 <td class="product-remove">
-                                                    {{-- Lưu ý: Dùng $item->id là ID của dòng trong bảng carts để xóa cho chuẩn --}}
                                                     <a title="Xóa" class="remove" href="{{ route('delete_cart', $item->id) }}" onclick="return confirm('Xóa sản phẩm này?')">×</a>
                                                 </td>
                                                 <td class="product-thumbnail">
@@ -85,17 +84,28 @@
                                                     </a>
                                                 </td>
                                                 <td class="product-name">
-                                                    <a href="{{ route('product_detail', $item->product_id) }}">{{ $item->name }}</a> 
+                                                    <a href="{{ route('product_detail', $item->product_id) }}">{{ $item->name }}</a>
                                                 </td>
                                                 <td class="product-price">
-                                                    <span class="amount">{{ number_format($item->price, 0, ',', '.') }} VNĐ</span> 
+                                                    <span class="amount">{{ number_format($item->current_product_price, 0, ',', '.') }} VNĐ</span> 
                                                 </td>
                                                 <td class="product-quantity">
-                                                    <div class="quantity buttons_added">
-                                                        <input type="button" class="minus" value="-">
-                                                        {{-- Input số lượng --}}
-                                                        <input type="number" size="4" class="input-text qty text" value="{{ $item->quantity }}" min="1" readonly>
-                                                        <input type="button" class="plus" value="+">
+                                                    <div class="quantity buttons_added" style="display: flex; align-items: center; gap: 5px;">
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary update-qty" 
+                                                                data-id="{{ $item->id }}" 
+                                                                data-type="minus" 
+                                                                style="padding: 2px 8px; font-weight: bold;">-</button>
+                                                        
+                                                        <input type="text" 
+                                                            class="form-control text-center qty-input-{{ $item->id }}" 
+                                                            value="{{ $item->quantity }}" 
+                                                            style="width: 45px; height: 30px; padding: 0; font-weight: bold; background: #fff;" 
+                                                            readonly>
+                                                        
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary update-qty" 
+                                                                data-id="{{ $item->id }}" 
+                                                                data-type="plus" 
+                                                                style="padding: 2px 8px; font-weight: bold;">+</button>
                                                     </div>
                                                 </td>
                                                 <td class="product-subtotal">
@@ -103,8 +113,17 @@
                                                 </td>
                                             </tr>
                                         @endforeach
+
+                                        {{-- HIỂN THỊ PHÂN TRANG TẠI ĐÂY (Nằm ngoài vòng lặp foreach nhưng trong tbody) --}}
+                                        <tr>
+                                            <td colspan="6">
+                                                <div class="pagination-wrapper" style="margin: 20px 0; display: flex; justify-content: center;">
+                                                    {{ $cart->links('pagination::bootstrap-4') }}
+                                                </div>
+                                            </td>
+                                        </tr>
                                     @else
-                                        <tr><td colspan="6" class="text-center">Giỏ hàng của bạn đang trống!</td></tr>
+                                        <tr><td colspan="6" class="text-center">Giỏ hàng trống!</td></tr>
                                     @endif
                                 </tbody>
                             </table>
@@ -129,103 +148,72 @@
 
                             <div class="cart_totals">
                                 <h2>Tổng đơn hàng</h2>
-                                <table cellspacing="0">
+                                <table cellspacing="0" style="width: 100%; margin-bottom: 20px;">
                                     <tr class="cart-subtotal">
-                                        <th>Tạm tính</th>
-                                        <td><span class="amount">{{ number_format($total, 0, ',', '.') }} VNĐ</span></td>
+                                        <th>Tạm tính (Tất cả sản phẩm)</th>
+                                        <td><span class="amount">{{ number_format($totalAll, 0, ',', '.') }} VNĐ</span></td>
                                     </tr>
                                     <tr class="shipping">
                                         <th>Phí vận chuyển</th>
-                                        <td>Miễn phí</td>
+                                        <td><span style="color: #1cc88a; font-weight: bold;">Miễn phí</span></td>
                                     </tr>
-                                    <tr class="order-total">
+                                    <tr class="order-total" style="border-top: 2px solid #eee;">
                                         <th>Tổng cộng</th>
-                                        <td><strong><span class="amount">{{ number_format($total, 0, ',', '.') }} VNĐ</span></strong></td>
+                                        <td><strong><span class="amount" style="color: #d9534f; font-size: 1.2em;">{{ number_format($totalAll, 0, ',', '.') }} VNĐ</span></strong></td>
                                     </tr>
                                 </table>
-                                
-                                {{-- NÚT THANH TOÁN CỦA BẠN ĐÂY --}}
-                                <div class="wc-proceed-to-checkout" style="margin-top: 20px; text-align: right;">
-                                    <a href="{{ route('checkout') }}" class="checkout-button button alt wc-forward" 
-                                    style="background: #5a88ca; color: #fff; padding: 10px 20px; text-transform: uppercase; font-weight: bold; text-decoration: none; display: inline-block;">
-                                        Tiến hành thanh toán
-                                    </a>
+
+                                <div class="wc-proceed-to-checkout" style="text-align: right;">
+                                    <div class="cart-actions-wrapper" style="display: flex; justify-content: flex-end; gap: 10px;">
+                                        <a href="{{ url('/') }}" class="btn-continue-shopping" style="background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+                                            <i class="fa fa-reply"></i> Tiếp tục mua hàng
+                                        </a>
+                                        <a href="{{ route('checkout') }}" class="btn-proceed-checkout" style="background: #5a88ca; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                                            Tiến hành thanh toán <i class="fa fa-arrow-right"></i>
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>  
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div> </div> </div> </div> @endsection
-
-{{-- PHẦN SCRIPT GIỮ NGUYÊN NHƯ CỦA BẠN --}}
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+            </div> 
+        </div> 
+    </div> 
+</div> 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // --- 1. XỬ LÝ NÚT TĂNG/GIẢM SỐ LƯỢNG ---
+$(document).ready(function() {
+    $(document).on('click', '.update-qty', function(e) {
+        e.preventDefault();
         
-        // Khi nhấn nút Cộng (+)
-        $(document).on('click', '.plus', function() {
-            // Tìm ô input gần nhất
-            var $input = $(this).parent().find('input.qty');
-            var val = parseInt($input.val());
-            // Tăng lên 1 và kích hoạt sự kiện change
-            $input.val(val + 1).trigger('change');
-        });
+        let btn = $(this);
+        let id = btn.data('id');
+        let type = btn.data('type');
+        let url = "/update-cart-quantity/" + id + "/" + type;
 
-        // Khi nhấn nút Trừ (-)
-        $(document).on('click', '.minus', function() {
-            var $input = $(this).parent().find('input.qty');
-            var val = parseInt($input.val());
-            // Giảm đi 1 nhưng không được nhỏ hơn 1
-            if (val > 1) {
-                $input.val(val - 1).trigger('change');
+        $.ajax({
+            url: url,
+            type: "GET",
+            success: function(response) {
+                if(response.status === 'success') {
+                    // 1. Tìm ô input số lượng của chính dòng này và cập nhật số mới
+                    // Lưu ý: Tôi giả định bạn đặt class cho input là qty-input-{{$item->id}}
+                    let inputField = $('.qty-' + id);
+                    inputField.val(response.quantity);
+
+                    // 2. Nếu bạn muốn tiền cũng nhảy theo:
+                    window.location.reload(); 
+                    
+                    // HOẶC dùng lệnh này để ép trình duyệt load lại chuẩn nhất:
+                    window.location.href = window.location.href;
+                }
+            },
+            error: function(xhr) {
+                alert('Lỗi kết nối server!');
             }
         });
-
-        // --- 2. XỬ LÝ TỰ ĐỘNG TÍNH TIỀN KHI SỐ LƯỢNG THAY ĐỔI ---
-
-        $(document).on('change', 'input.qty', function() {
-            var $row = $(this).closest('tr'); // Lấy dòng hiện tại
-            var qty = parseInt($(this).val()); // Lấy số lượng mới
-
-            // Lấy đơn giá (cần xử lý xóa chữ 'VNĐ' và dấu phẩy để tính toán)
-            var priceText = $row.find('.product-price .amount').text();
-            var price = parseInt(priceText.replace(/[^0-9]/g, '')); // Chỉ giữ lại số
-
-            // Tính thành tiền mới
-            var newSubtotal = qty * price;
-
-            // Định dạng lại thành tiền tệ Việt Nam (Ví dụ: 10.000.000 VNĐ)
-            var formattedSubtotal = new Intl.NumberFormat('vi-VN').format(newSubtotal) + ' VNĐ';
-
-            // Cập nhật hiển thị cột Total của dòng đó
-            $row.find('.product-subtotal .amount').text(formattedSubtotal);
-
-            // Gọi hàm cập nhật tổng giỏ hàng phía dưới
-            updateCartTotal();
-        });
-
-        // Hàm tính tổng cả giỏ hàng (Cart Totals)
-        function updateCartTotal() {
-            var grandTotal = 0;
-            
-            // Duyệt qua tất cả các dòng sản phẩm để cộng dồn tiền
-            $('.product-subtotal .amount').each(function() {
-                var val = parseInt($(this).text().replace(/[^0-9]/g, ''));
-                grandTotal += val;
-            });
-
-            // Định dạng và hiển thị ra 2 ô Tổng cộng phía dưới
-            var formattedGrandTotal = new Intl.NumberFormat('vi-VN').format(grandTotal) + ' VNĐ';
-            
-            // Cập nhật ô "Tạm tính" và "Tổng cộng"
-            $('.cart-subtotal .amount').text(formattedGrandTotal);
-            $('.order-total .amount').text(formattedGrandTotal);
-        }
     });
+});
 </script>
-
-
-
-
+@endsection
