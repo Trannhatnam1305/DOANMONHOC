@@ -14,35 +14,37 @@ class WebController extends Controller
 
 
     public function cart()
-    {
-        // 1. Lấy dữ liệu giỏ hàng từ session
-        $cart = session()->get('cart', []);
+        {
+            // 1. Khởi tạo biến mặc định
+            $cart = [];
+            $totalAll = 0;
 
-        // 2. Sidebar Products - Chỉ lấy những sản phẩm đang được BẬT (status = 1)
-        $products_sidebar = DB::table('products')
-            ->where('status', 1) // Thêm điều kiện này
-            ->inRandomOrder()
-            ->limit(8)
-            ->get();
+            if (Auth::check()) {
+                // Query kết nối bảng carts và products để lấy dữ liệu realtime
+                $cartQuery = DB::table('carts')
+                    ->join('products', 'carts.product_id', '=', 'products.id')
+                    ->where('carts.user_id', Auth::id());
 
-        // 3. You may be interested in - Chỉ lấy sản phẩm đang BẬT
-        $products_interested = DB::table('products')
-            ->where('status', 1) // Thêm điều kiện này
-            ->inRandomOrder()
-            ->limit(4)
-            ->get();
+                // Tính tổng tiền cho TOÀN BỘ giỏ hàng (Không bị ảnh hưởng bởi phân trang)
+                $totalAll = (clone $cartQuery)->sum(DB::raw('carts.quantity * products.price'));
 
-        // 4. Recent Posts - Lấy 5 sản phẩm mới nhất và đang BẬT
-        $recent_posts = DB::table('products')
-            ->where('status', 1) // Thêm điều kiện này
-            ->orderBy('id', 'desc')
-            ->limit(5)
-            ->get();
+                // Lấy dữ liệu và thực hiện phân trang (5 món/trang)
+                $cart = $cartQuery->select(
+                    'carts.*', 
+                    'products.name', 
+                    'products.image', 
+                    'products.price as current_product_price', // Đặt alias để View gọi được
+                    'products.stock_quantity' // Kiểm tra tồn kho realtime
+                )->paginate(3);
+            }
 
-        // 5. Trả về view với tất cả các biến đã lọc
-        return view('user.cart', compact('cart', 'products_sidebar', 'products_interested', 'recent_posts'));
-    }
+            // 2. Các biến Sidebar giữ nguyên logic
+            $products_sidebar = DB::table('products')->where('status', 1)->inRandomOrder()->limit(8)->get();
+            $products_interested = DB::table('products')->where('status', 1)->inRandomOrder()->limit(4)->get();
+            $recent_posts = DB::table('products')->where('status', 1)->orderBy('id', 'desc')->limit(5)->get();
 
+            return view('user.cart', compact('cart', 'totalAll', 'products_sidebar', 'products_interested', 'recent_posts'));
+        }
     public function addToCart(Request $request, $id)
         {
             // 1. Phải đăng nhập mới lưu vào DB được
@@ -397,6 +399,9 @@ class WebController extends Controller
             $stock = DB::table('products')->where('id', $id)->value('stock_quantity');
             return response()->json(['stock' => $stock ?? 0]);
         }
+
+
+  
                     
 
        

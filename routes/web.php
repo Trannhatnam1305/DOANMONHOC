@@ -1,4 +1,4 @@
-<?php
+Product<?php
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WebController;
 use App\Http\Controllers\AdminController;
@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\ResultToken;
 use App\Http\Middleware\IsLogin;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckOutController;
 use App\Models\Contact;
 // Route::get('/', function () {
 //     return view('welcome');
@@ -19,12 +20,13 @@ use App\Models\Contact;
 //Router Trang Chủ
 Route::get('/', [WebController::class, 'index']);
 //Route Trang Checkout
-Route::get('/checkout', [WebController::class, 'checkout']);
-//Route Trang Shop
+// Trang hiển thị form thanh toán
+Route::get('/checkout', [CheckOutController::class, 'checkout'])->name('checkout');
+Route::post('/place-order', [CheckOutController::class, 'placeOrder'])->name('place_order');
 Route::get('/shop', [WebController::class, 'shop']);
 //Route Trang Single Product
-Route::get('/single-product', [WebController::class, 'singleproduct']);
-//Route Trang Contact
+// Thêm {id} để truyền mã sản phẩm và đặt tên route là product_detail
+Route::get('/product-detail/{id}', [WebController::class, 'show'])->name('product_detail');//Route Trang Contact
 Route::get('/contact', [WebController::class, 'contact']);
 
 // Route xem trang giỏ hàng
@@ -44,12 +46,10 @@ Route::get('/cart', [WebController::class, 'cart'])->name('cart');
 Route::get('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
 Route::post('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
 Route::get('/delete-cart/{id}', [WebController::class, 'deleteCart'])->name('delete_cart');
-Route::get('/update-cart-quantity/{id}/{type}', [WebController::class, 'updateQuantity'])->name('update_cart_quantity');
-Route::get('/product/{id}', [WebController::class, 'show'])->name('product_detail');
+Route::get('/update-cart-quantity/{id}/{type}', [CheckoutController::class, 'updateQuantity'])->name('update_cart_qty');
 Route::get('/get-stock/{id}', [WebController::class, 'getStockQuantity'])->name('get_stock_quantity');
 // Tìm kiếm
 Route::get('/search', [WebController::class, 'search'])->name('search');
-Route::get('/checkout', [WebController::class, 'checkout'])->name('checkout');
 Route::get('/profile', [WebController::class, 'editProfile'])->name('user.profile.edit');    
 Route::post('/profile/update', [WebController::class, 'updateProfile'])->name('user.profile.update');
 Route::post('/contact-send', [WebController::class, 'sendContact'])->name('contact.send');
