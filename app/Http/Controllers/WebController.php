@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -11,8 +12,6 @@ use Illuminate\Support\Facades\Auth;
 
 class WebController extends Controller
 {
-
-
     public function cart()
         {
             // 1. Lấy dữ liệu giỏ hàng từ DATABASE thay vì Session
@@ -58,36 +57,47 @@ class WebController extends Controller
                 return redirect()->route('login')->with('info', 'Vui lòng đăng nhập để lưu giỏ hàng!');
             }
 
-            $userId = Auth::id();
-            $quantity = $request->input('quantity', 1);
-            
-            // 2. Lấy giá sản phẩm (giá gốc hoặc giá giảm)
-            $product = DB::table('products')->where('id', $id)->first();
-            $currentPrice = $product->discount_price > 0 ? $product->discount_price : $product->price;
+        $products_sidebar = DB::table('products')->where('status', 1)->inRandomOrder()->limit(8)->get();
+        $products_interested = DB::table('products')->where('status', 1)->inRandomOrder()->limit(4)->get();
+        $recent_posts = DB::table('products')->where('status', 1)->orderBy('id', 'desc')->limit(5)->get();
 
-            // 3. Kiểm tra sản phẩm đã tồn tại trong giỏ của user này chưa
-            $cartItem = DB::table('carts')
-                ->where('user_id', $userId)
-                ->where('product_id', $id)
-                ->first();
+        return view('user.cart', compact('cart', 'totalAll', 'products_sidebar', 'products_interested', 'recent_posts'));
+    }
 
-            if ($cartItem) {
-                // Nếu có rồi thì UPDATE số lượng
-                DB::table('carts')->where('id', $cartItem->id)->increment('quantity', $quantity);
-            } else {
-                // Nếu chưa có thì INSERT mới
-                DB::table('carts')->insert([
-                    'user_id'    => $userId,
-                    'product_id' => $id,
-                    'quantity'   => $quantity,
-                    'price'      => $currentPrice,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
-            }
-
-            return redirect()->route('cart')->with('success', 'Đã cập nhật giỏ hàng hệ thống!');
+    public function addToCart(Request $request, $id)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('info', 'Vui lòng đăng nhập để lưu giỏ hàng!');
         }
+
+        $userId = Auth::id();
+        $quantity = $request->input('quantity', 1);
+        
+        $product = DB::table('products')->where('id', $id)->first();
+        if (!$product) return redirect()->back()->with('error', 'Sản phẩm không tồn tại!');
+
+        $currentPrice = (isset($product->discount_price) && $product->discount_price > 0) ? $product->discount_price : $product->price;
+
+        $cartItem = DB::table('carts')
+            ->where('user_id', $userId)
+            ->where('product_id', $id)
+            ->first();
+
+        if ($cartItem) {
+            DB::table('carts')->where('id', $cartItem->id)->increment('quantity', $quantity);
+        } else {
+            DB::table('carts')->insert([
+                'user_id'    => $userId,
+                'product_id' => $id,
+                'quantity'   => $quantity,
+                'price'      => $currentPrice,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+
+        return redirect()->route('cart')->with('success', 'Đã thêm vào giỏ hàng!');
+    }
 
     public function index()
         {
@@ -116,58 +126,40 @@ class WebController extends Controller
                         ->orderBy('id', 'desc')
                         ->paginate(12); 
 
-            return view("user.shop", compact('products'));
-        }
+        return view("user.shop", compact('products'));
+    }
 
     public function contact()
-        {
-            return view("user.contact");
-        }
+    {
+        return view("user.contact");
+    }
 
     public function signup()
-        {
-            return view('user.signup');
-        }
+    {
+        return view('user.signup');
+    }
+
     public function login()
-        {
-            return view('user.login');
-        }
+    {
+        return view('user.login');
+    }
+
     public function postLogin(Request $request)
-        {
-            // 1. Lấy dữ liệu từ form
-            $credentials = [
-                'username' => $request->username,
-                'password' => $request->password,
-            ];
+    {
+        $credentials = [
+            'username' => $request->username,
+            'password' => $request->password,
+        ];
 
-            // 2. Kiểm tra đăng nhập bằng Auth::attempt
-            // Hàm này tự động so khớp username và mã hóa password để kiểm tra
-            if (Auth::attempt($credentials)) {
-
-                // --- ĐOẠN KIỂM TRA KHÓA TÀI KHOẢN ---
-                // Lấy thông tin user vừa đăng nhập thành công
-                $user = Auth::user();
-
-                if ($user->status == 0) {
-                    // Nếu status = 0 (Bị khóa) -> Đăng xuất ngay lập tức
-                    Auth::logout();
-
-                    // Xóa session để an toàn
-                    $request->session()->invalidate();
-                    $request->session()->regenerateToken();
-
-                    // Trả về trang đăng nhập với thông báo lỗi
-                    return redirect()->back()->with('error', 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin!');
-                }
-                // -------------------------------------
-
-                // Nếu tài khoản hoạt động bình thường (status = 1)
-                // Chuyển hướng về trang chủ hoặc trang shop
-                return redirect('/'); // Hoặc route('/') tùy project của bạn
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            if ($user->status == 0) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return redirect()->back()->with('error', 'Tài khoản của bạn đã bị khóa!');
             }
-
-            // 3. Nếu đăng nhập thất bại (Sai username hoặc password)
-            return redirect()->back()->with('error', 'Tên đăng nhập hoặc mật khẩu không đúng!');
+            return redirect('/');
         }
     public function logout(Request $request) 
         {
@@ -177,31 +169,24 @@ class WebController extends Controller
             return redirect('/');
          }
     public function postSignup(Request $request)
-        {
-            // Kiểm tra dữ liệu đầu vào
-            $request->validate([
-                'username' => 'required|unique:users,username|min:3',
-                'email' => 'required|email|unique:users,email',
-                'password' => 'required|min:6|confirmed', // 'confirmed' yêu cầu có ô password_confirmation
-            ], [
-                'username.unique' => 'Tên đăng nhập này đã có người sử dụng.',
-                'email.unique' => 'Email này đã được đăng ký.',
-                'password.confirmed' => 'Mật khẩu xác nhận không khớp.',
-            ]);
+    {
+        $request->validate([
+            'username' => 'required|unique:users,username|min:3',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6|confirmed',
+        ]);
 
-            // Tạo user mới
-            $user = User::create([
-                'username' => $request->username,
-                'email' => $request->email,
-                'password' => Hash::make($request->password), // Mã hóa mật khẩu
-                'role' => 0, // Mặc định là người dùng bình thường
-            ]);
+        $user = User::create([
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 0,
+        ]);
 
-            // Sau khi đăng ký xong, tự động đăng nhập luôn
-            Auth::login($user);
+        Auth::login($user);
+        return redirect('/')->with('status', 'Đăng ký thành công!');
+    }
 
-            return redirect('/')->with('status', 'Đăng ký tài khoản thành công!');
-        }
     public function deleteCart($id)
         {
             $cart = session()->get('cart');

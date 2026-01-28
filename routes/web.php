@@ -23,7 +23,9 @@ Route::get('/checkout', [WebController::class, 'checkout']);
 //Route Trang Shop
 Route::get('/shop', [WebController::class, 'shop']);
 //Route Trang Single Product
-Route::get('/single-product', [WebController::class, 'singleproduct']);
+// Thêm {id} để truyền mã sản phẩm và đặt tên route là product_detail
+Route::get('/product/{id}', [WebController::class, 'show'])->name('product_detail');
+//Route::get('/single-product', [WebController::class, 'singleproduct']);
 //Route Trang Contact
 Route::get('/contact', [WebController::class, 'contact']);
 
