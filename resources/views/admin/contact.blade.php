@@ -35,7 +35,10 @@
                                 <i class="fa fa-check"></i> Đánh dấu đã xem
                             </a>
                         @else
-                            <span class="label label-default">Đã xem</span>
+                            <div class="action-buttons">
+                                <button class="action-button edit-btn">✏️</button>
+                                <button class="action-button delete-btn">🗑️</button>
+                            </div>
                         @endif
                     </td>
                 </tr>

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/owl.carousel.css') }}">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/responsive.css') }}">
@@ -20,7 +21,6 @@
     @yield('css')
 </head>
 <body>
-
     <div class="header-area">
         <div class="container">
             <div class="row">
@@ -74,7 +74,12 @@
                         <li><a href="/">Trang chủ</a></li>
                         <li><a href="/shop">Danh sách sản phẩm</a></li>
                         <li><a href="/cart">Giỏ hàng</a></li>
-                        <li><a href="/contact">Liên hệ</a></li>
+
+                        <li><a href="#">Danh mục</a></li>
+
+                        <li><a href="/contact">liên hệ</a></li>
+
+                        <li><a href="/blog">Blog</a></li>
                     </ul>
                 </div>
             </div>
@@ -153,11 +158,18 @@
                 </div>
             </div>
         </div>
-    </div> <script src="https://code.jquery.com/jquery.min.js"></script>
+    </div> <!-- End footer bottom area -->
+
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    {{-- SỬA LẠI CÁC DÒNG NÀY --}}
     <script src="{{ asset('js/owl.carousel.min.js') }}"></script>
     <script src="{{ asset('js/jquery.sticky.js') }}"></script>
+
     <script src="{{ asset('js/jquery.easing.1.3.min.js') }}"></script>
+
     <script src="{{ asset('js/main.js') }}"></script>
     
     @yield('js')
