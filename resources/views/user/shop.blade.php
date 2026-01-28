@@ -1,4 +1,4 @@
-@extends('layout.client_layout') {{-- Đảm bảo layout này tồn tại --}}
+@extends('layout.user_layout')
 
 @section('main')
     <div class="product-big-title-area">
