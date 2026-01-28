@@ -25,15 +25,15 @@ Route::get('/checkout', [CheckOutController::class, 'checkout'])->name('checkout
 Route::post('/place-order', [CheckOutController::class, 'placeOrder'])->name('place_order');
 Route::get('/shop', [WebController::class, 'shop']);
 //Route Trang Single Product
-Route::get('/single-product', [WebController::class, 'singleproduct']);
-//Route Trang Contact
+// Thêm {id} để truyền mã sản phẩm và đặt tên route là product_detail
+Route::get('/product-detail/{id}', [WebController::class, 'show'])->name('product_detail');//Route Trang Contact
 Route::get('/contact', [WebController::class, 'contact']);
 
 Route::get('/cart', [WebController::class, 'cart'])->name('cart');
 Route::get('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
 Route::post('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
 Route::get('/delete-cart/{id}', [WebController::class, 'deleteCart'])->name('delete_cart');
-Route::get('/update-cart-quantity/{id}/{type}', [App\Http\Controllers\CheckOutController::class, 'updateQuantity'])->name('update_cart_quantity');Route::get('/product/{id}', [WebController::class, 'show'])->name('product_detail');
+Route::get('/update-cart-quantity/{id}/{type}', [CheckoutController::class, 'updateQuantity'])->name('update_cart_qty');
 Route::get('/get-stock/{id}', [WebController::class, 'getStockQuantity'])->name('get_stock_quantity');
 // Tìm kiếm
 Route::get('/search', [WebController::class, 'search'])->name('search');

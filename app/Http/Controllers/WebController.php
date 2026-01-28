@@ -208,42 +208,6 @@ class WebController extends Controller
 
             return redirect()->back()->with('success', 'Đã xóa sản phẩm thành công!');
         }
-    public function updateQuantity($id, $type)
-        {
-            // Tìm sản phẩm trong bảng carts theo ID của dòng đó
-            $cartItem = DB::table('carts')->where('id', $id)->first();
-
-            if ($cartItem) {
-                $newQty = $cartItem->quantity;
-
-                if ($type == 'plus') {
-                    $newQty++;
-                } elseif ($type == 'minus' && $cartItem->quantity > 1) {
-                    $newQty--;
-                }
-
-                // Cập nhật lại số lượng vào Database
-                DB::table('carts')->where('id', $id)->update(['quantity' => $newQty]);
-
-                // Tính toán lại tổng tiền của cả giỏ hàng (cho user hiện tại)
-                $cartItems = DB::table('carts')
-                    ->where('user_id', Auth::id())
-                    ->get();
-
-                $total = $cartItems->sum(function($item) {
-                    return $item->price * $item->quantity;
-                });
-
-                return response()->json([
-                    'status'   => 'success',
-                    'quantity' => $newQty,
-                    'subtotal' => number_format($cartItem->price * $newQty, 0, ',', '.') . ' VNĐ',
-                    'total'    => number_format($total, 0, ',', '.') . ' VNĐ'
-                ]);
-            }
-
-            return response()->json(['status' => 'error'], 404);
-        }
     public function checkout()
         {
             return view('user.checkout'); // Tạo file checkout.blade.php trống để hết lỗi
@@ -333,6 +297,9 @@ class WebController extends Controller
             $stock = DB::table('products')->where('id', $id)->value('stock_quantity');
             return response()->json(['stock' => $stock ?? 0]);
         }
+
+
+  
                     
 
        

@@ -88,7 +88,7 @@ class CheckOutController extends Controller
         return redirect('/')->with('success', 'Đặt hàng thành công! Cảm ơn bạn đã mua sắm.');
     }
 
-    public function updateQuantity($id, $type)
+       public function updateQuantity($id, $type)
     {
         // 1. Kiểm tra đăng nhập
         if (!Auth::check()) {
