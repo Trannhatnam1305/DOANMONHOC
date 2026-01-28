@@ -122,29 +122,9 @@ return new class extends Migration
             $table->text('value')->nullable();
             $table->timestamps();
         });
-        Schema::create('orders', function (Blueprint $table) {
-            $table->id();
-            $table->integer('user_id');
-            $table->string('full_name');
-            $table->string('phone');
-            $table->string('address');
-            $table->text('note')->nullable();
-            $table->decimal('total_price', 15, 2);
-            $table->string('status')->default('pending'); // Chờ xử lý
-            $table->timestamps();
-        });
-
-        Schema::create('order_details', function (Blueprint $table) {
-            $table->id();
-            $table->integer('order_id');
-            $table->integer('product_id');
-            $table->integer('quantity');
-            $table->decimal('price', 15, 2);
-            $table->timestamps();
-        });
 
     
- }
+    }
 
     public function down(): void
     {
@@ -157,11 +137,4 @@ return new class extends Migration
         Schema::dropIfExists('suppliers');
         Schema::dropIfExists('users');
     }
-
-    
-
-
-
-
-
 };
