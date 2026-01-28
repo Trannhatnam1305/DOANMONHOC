@@ -26,22 +26,9 @@ Route::post('/place-order', [CheckOutController::class, 'placeOrder'])->name('pl
 Route::get('/shop', [WebController::class, 'shop']);
 //Route Trang Single Product
 // Thêm {id} để truyền mã sản phẩm và đặt tên route là product_detail
-Route::get('/product-detail/{id}', [WebController::class, 'show'])->name('product_detail');//Route Trang Contact
+Route::get('/product/{id}', [WebController::class, 'show'])->name('product_detail');
 Route::get('/contact', [WebController::class, 'contact']);
 
-// Route xem trang giỏ hàng
-Route::get('/cart', [WebController::class, 'cart'])->name('cart');
-// Route xem trang giới thiệu
-Route::get('/blog', [WebController::class, 'blog'])->name('blog');
-// Route xem chi tiết bài viết, nhận vào tham số {id}
-Route::get('/blog/{id}', [App\Http\Controllers\WebController::class, 'blogDetail'])->name('blog.detail');
-// Route thêm sản phẩm vào giỏ (nhận ID sản phẩm)
-Route::get('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
-// Route xóa sản phẩm khỏi giỏ hàng
-Route::get('/delete-cart/{id}', [WebController::class, 'deleteCart'])->name('delete_cart');
-// Thêm ->name('product_detail') vào cuối route của bạn
-Route::get('/san-pham/{id}', [WebController::class, 'show'])->name('product_detail');
-// Route xử lý tăng giảm số lượng
 Route::get('/cart', [WebController::class, 'cart'])->name('cart');
 Route::get('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
 Route::post('/add-to-cart/{id}', [WebController::class, 'addToCart'])->name('add_to_cart');
