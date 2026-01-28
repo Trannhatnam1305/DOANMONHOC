@@ -86,16 +86,26 @@
                     <a href="/shop" class="wid-view-more">View All</a>
 
                     @foreach($products_seller as $product_seller)
-                    <div class="single-wid-product">
-                        <a href="single-product.html"><img src="{{ asset('storage/' . $product_seller->image) }}" alt="" class="product-thumb"></a>
-                        <h2><a href="single-product.html">{{$product_seller->name}}</a></h2>
-                        <div class="product-wid-rating">
-                            <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                        <div class="single-wid-product">
+                            {{-- Click vào ảnh để xem chi tiết --}}
+                            <a href="{{ route('product_detail', $product_seller->id) }}">
+                                <img src="{{ asset('storage/' . $product_seller->image) }}" alt="" class="product-thumb">
+                            </a>
+
+                            {{-- Click vào tên để xem chi tiết --}}
+                            <h2>
+                                <a href="{{ route('product_detail', $product_seller->id) }}">{{ $product_seller->name }}</a>
+                            </h2>
+
+                            <div class="product-wid-rating">
+                                <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                            </div>
+
+                            <div class="product-wid-price">
+                                <ins>{{ number_format($product_seller->discount_price) }}đ</ins> 
+                                <del>{{ number_format($product_seller->price) }}đ</del>
+                            </div>
                         </div>
-                        <div class="product-wid-price">
-                            <ins>${{$product_seller->discount_price}}</ins> <del>${{$product_seller->price}}</del>
-                        </div>
-                    </div>
                     @endforeach
                 </div>
             </div>

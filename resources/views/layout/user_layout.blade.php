@@ -1,22 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>eElectronics - HTML eCommerce Template</title>
-    @yield('css')
-    <!-- Google Fonts -->
-    <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,300,700,600' rel='stylesheet'
-        type='text/css'>
+
+    <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,300,700,600' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:400,700,300' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Raleway:400,100' rel='stylesheet' type='text/css'>
 
-    <!-- Bootstrap -->
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 
     <!-- Custom CSS -->
@@ -24,14 +18,8 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/responsive.css') }}">
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    @yield('css')
 </head>
-
 <body>
     <div class="header-area">
         <div class="container">
@@ -39,55 +27,31 @@
                 <div class="col-md-8">
                     <div class="user-menu">
                         <ul>
-                            {{-- 1. Danh sách yêu thích --}}
                             <li><a href="#"><i class="fa fa-heart"></i> Danh sách yêu thích</a></li>
-
-                            {{-- 2. Giỏ hàng --}}
                             <li><a href="/cart"><i class="fa fa-shopping-cart"></i> Giỏ hàng</a></li>
-
-                            {{-- 3. Thanh toán --}}
                             <li><a href="/checkout"><i class="fa fa-money"></i> Thanh toán</a></li>
-
-                            {{-- 4. Logic Đăng nhập / Đăng xuất --}}
                             @if(Auth::check())
-                                        {{-- HIỂN THỊ KHI ĐÃ ĐĂNG NHẬP --}}
-                                        <li>
-                                            {{-- Khớp với tên route đã đặt ở WebController --}}
-                                            <a href="{{ route('user.profile.edit') }}">
-                                                <i class="fa fa-user"></i> 
-                                                {{-- Ưu tiên hiển thị tên, nếu không có username thì dùng email hoặc name --}}
-                                                Xin chào, {{ Auth::user()->username ?? Auth::user()->name }}
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            {{-- Nút Đăng xuất --}}
-                                            <a href="{{ route('logout') }}" 
-                                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                                            style="color: #ff4d4d; font-weight: bold;">
-                                                <i class="fa fa-sign-out"></i> Đăng xuất
-                                            </a>
-                                            
-                                            {{-- Form ẩn để đăng xuất an toàn bằng phương thức POST --}}
-                                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                                                @csrf
-                                            </form>
-                                        </li>
-                                    @else
-                                        {{-- HIỂN THỊ KHI CHƯA ĐĂNG NHẬP --}}
-                                        <li><a href="{{ route('login') }}"><i class="fa fa-unlock-alt"></i> Đăng nhập</a></li>
-                                        <li><a href="{{ route('register') }}"><i class="fa fa-user-plus"></i> Đăng ký</a></li>
-                                    @endif
+                                <li>
+                                    <a href="{{ route('user.profile.edit') }}">
+                                        <i class="fa fa-user"></i> Xin chào, {{ Auth::user()->username ?? Auth::user()->name }}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        <i class="fa fa-sign-out"></i> Đăng xuất
+                                    </a>
+                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
+                                </li>
+                            @else
+                                <li><a href="{{ route('login') }}"><i class="fa fa-unlock-alt"></i> Đăng nhập</a></li>
+                                <li><a href="{{ route('register') }}"><i class="fa fa-user-plus"></i> Đăng ký</a></li>
+                            @endif
                         </ul>
                     </div>
                 </div>
-
-
             </div>
         </div>
-    </div> <!-- End header area -->
-
-    <div class="site-branding-area">
+    </div> <div class="site-branding-area">
         <div class="container">
             <div class="row">
                 <div class="col-sm-6">
@@ -95,33 +59,20 @@
                         <h1><a href="/">e<span>Electronics</span></a></h1>
                     </div>
                 </div>
-
                 <div class="col-sm-6">
                     <div class="shopping-item">
-                        <a href="/cart">Giỏ hàng - <span class="cart-amunt">$800</span> <i
-                                class="fa fa-shopping-cart"></i> <span class="product-count">5</span></a>
+                        <a href="/cart">Giỏ hàng - <span class="cart-amunt">$800</span> <i class="fa fa-shopping-cart"></i> <span class="product-count">5</span></a>
                     </div>
                 </div>
             </div>
         </div>
-    </div> <!-- End site branding area -->
-
-    <div class="mainmenu-area">
+    </div> <div class="mainmenu-area">
         <div class="container">
             <div class="row">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                </div>
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
                         <li><a href="/">Trang chủ</a></li>
                         <li><a href="/shop">Danh sách sản phẩm</a></li>
-
                         <li><a href="/cart">Giỏ hàng</a></li>
 
                         <li><a href="#">Danh mục</a></li>
@@ -133,8 +84,8 @@
                 </div>
             </div>
         </div>
-    </div> <!-- End mainmenu area -->
-    @yield('main')
+    </div> @yield('main')
+
     <div class="footer-top-area">
         <div class="zigzag-bottom"></div>
         <div class="container">
@@ -223,5 +174,4 @@
     
     @yield('js')
 </body>
-
 </html>

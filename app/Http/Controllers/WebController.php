@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Product;
 use App\Models\Contact;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 class WebController extends Controller
 {
+
+
     public function cart()
     {
         // 1. Lấy dữ liệu giỏ hàng từ session
@@ -40,38 +43,43 @@ class WebController extends Controller
         return view('user.cart', compact('cart', 'products_sidebar', 'products_interested', 'recent_posts'));
     }
 
-    public function addToCart($id)
-    {
-        // 1. Tìm sản phẩm trong database theo ID
-        $product = DB::table('products')->find($id);
+    public function addToCart(Request $request, $id)
+        {
+            // 1. Phải đăng nhập mới lưu vào DB được
+            if (!Auth::check()) {
+                return redirect()->route('login')->with('info', 'Vui lòng đăng nhập để lưu giỏ hàng!');
+            }
 
-        // Nếu không tìm thấy sản phẩm thì báo lỗi 404
-        if (!$product) {
-            abort(404);
+            $userId = Auth::id();
+            $quantity = $request->input('quantity', 1);
+            
+            // 2. Lấy giá sản phẩm (giá gốc hoặc giá giảm)
+            $product = DB::table('products')->where('id', $id)->first();
+            $currentPrice = $product->discount_price > 0 ? $product->discount_price : $product->price;
+
+            // 3. Kiểm tra sản phẩm đã tồn tại trong giỏ của user này chưa
+            $cartItem = DB::table('carts')
+                ->where('user_id', $userId)
+                ->where('product_id', $id)
+                ->first();
+
+            if ($cartItem) {
+                // Nếu có rồi thì UPDATE số lượng
+                DB::table('carts')->where('id', $cartItem->id)->increment('quantity', $quantity);
+            } else {
+                // Nếu chưa có thì INSERT mới
+                DB::table('carts')->insert([
+                    'user_id'    => $userId,
+                    'product_id' => $id,
+                    'quantity'   => $quantity,
+                    'price'      => $currentPrice,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            return redirect()->route('cart')->with('success', 'Đã cập nhật giỏ hàng hệ thống!');
         }
-
-        // 2. Lấy giỏ hàng hiện tại từ session (nếu chưa có thì là mảng rỗng)
-        $cart = session()->get('cart', []);
-
-        // 3. Kiểm tra: Nếu sản phẩm đã có trong giỏ rồi thì tăng số lượng lên
-        if (isset($cart[$id])) {
-            $cart[$id]['quantity']++;
-        } else {
-            // 4. Nếu chưa có thì thêm mới vào mảng cart
-            $cart[$id] = [
-                "name" => $product->name,
-                "quantity" => 1,
-                "price" => $product->discount_price > 0 ? $product->discount_price : $product->price, // Ưu tiên lấy giá giảm
-                "image" => $product->image
-            ];
-        }
-
-        // 5. Lưu lại giỏ hàng mới vào Session
-        session()->put('cart', $cart);
-
-        // 6. Chuyển hướng người dùng đến trang Giỏ hàng để xem kết quả
-        return redirect()->route('cart')->with('success', 'Đã thêm sản phẩm vào giỏ hàng!');
-    }
 
     public function index()
     {
@@ -100,54 +108,58 @@ class WebController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(12);
 
-        return view("user.shop", compact('products'));
-    }
+            return view("user.shop", compact('products'));
+        }
 
     public function contact()
-    {
-        return view("user.contact");
-    }
+        {
+            return view("user.contact");
+        }
 
     public function signup()
-    {
-        return view('user.signup');
-    }
+        {
+            return view('user.signup');
+        }
     public function login()
-    {
-        return view('user.login');
-    }
+        {
+            return view('user.login');
+        }
     public function postLogin(Request $request)
-    {
-        // 1. Lấy dữ liệu từ form
-        $credentials = [
-            'username' => $request->username,
-            'password' => $request->password,
-        ];
+        {
+            // 1. Lấy dữ liệu từ form
+            $credentials = [
+                'username' => $request->username,
+                'password' => $request->password,
+            ];
 
-        // 2. Kiểm tra đăng nhập bằng Auth::attempt
-        // Hàm này tự động so khớp username và mã hóa password để kiểm tra
-        if (Auth::attempt($credentials)) {
+            // 2. Kiểm tra đăng nhập bằng Auth::attempt
+            // Hàm này tự động so khớp username và mã hóa password để kiểm tra
+            if (Auth::attempt($credentials)) {
 
-            // --- ĐOẠN KIỂM TRA KHÓA TÀI KHOẢN ---
-            // Lấy thông tin user vừa đăng nhập thành công
-            $user = Auth::user();
+                // --- ĐOẠN KIỂM TRA KHÓA TÀI KHOẢN ---
+                // Lấy thông tin user vừa đăng nhập thành công
+                $user = Auth::user();
 
-            if ($user->status == 0) {
-                // Nếu status = 0 (Bị khóa) -> Đăng xuất ngay lập tức
-                Auth::logout();
+                if ($user->status == 0) {
+                    // Nếu status = 0 (Bị khóa) -> Đăng xuất ngay lập tức
+                    Auth::logout();
 
-                // Xóa session để an toàn
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+                    // Xóa session để an toàn
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
 
-                // Trả về trang đăng nhập với thông báo lỗi
-                return redirect()->back()->with('error', 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin!');
+                    // Trả về trang đăng nhập với thông báo lỗi
+                    return redirect()->back()->with('error', 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin!');
+                }
+                // -------------------------------------
+
+                // Nếu tài khoản hoạt động bình thường (status = 1)
+                // Chuyển hướng về trang chủ hoặc trang shop
+                return redirect('/'); // Hoặc route('/') tùy project của bạn
             }
-            // -------------------------------------
 
-            // Nếu tài khoản hoạt động bình thường (status = 1)
-            // Chuyển hướng về trang chủ hoặc trang shop
-            return redirect('/'); // Hoặc route('/') tùy project của bạn
+            // 3. Nếu đăng nhập thất bại (Sai username hoặc password)
+            return redirect()->back()->with('error', 'Tên đăng nhập hoặc mật khẩu không đúng!');
         }
 
         // 3. Nếu đăng nhập thất bại (Sai username hoặc password)
@@ -161,43 +173,43 @@ class WebController extends Controller
         return redirect('/');
     }
     public function postSignup(Request $request)
-    {
-        // Kiểm tra dữ liệu đầu vào
-        $request->validate([
-            'username' => 'required|unique:users,username|min:3',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed', // 'confirmed' yêu cầu có ô password_confirmation
-        ], [
-            'username.unique' => 'Tên đăng nhập này đã có người sử dụng.',
-            'email.unique' => 'Email này đã được đăng ký.',
-            'password.confirmed' => 'Mật khẩu xác nhận không khớp.',
-        ]);
+        {
+            // Kiểm tra dữ liệu đầu vào
+            $request->validate([
+                'username' => 'required|unique:users,username|min:3',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|min:6|confirmed', // 'confirmed' yêu cầu có ô password_confirmation
+            ], [
+                'username.unique' => 'Tên đăng nhập này đã có người sử dụng.',
+                'email.unique' => 'Email này đã được đăng ký.',
+                'password.confirmed' => 'Mật khẩu xác nhận không khớp.',
+            ]);
 
-        // Tạo user mới
-        $user = User::create([
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password), // Mã hóa mật khẩu
-            'role' => 0, // Mặc định là người dùng bình thường
-        ]);
+            // Tạo user mới
+            $user = User::create([
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password), // Mã hóa mật khẩu
+                'role' => 0, // Mặc định là người dùng bình thường
+            ]);
 
-        // Sau khi đăng ký xong, tự động đăng nhập luôn
-        Auth::login($user);
+            // Sau khi đăng ký xong, tự động đăng nhập luôn
+            Auth::login($user);
 
-        return redirect('/')->with('status', 'Đăng ký tài khoản thành công!');
-    }
-    public function deleteCart($id)
-    {
-        $cart = session()->get('cart');
-
-        // Kiểm tra xem sản phẩm có trong giỏ không thì mới xóa
-        if (isset($cart[$id])) {
-            unset($cart[$id]); // Hàm unset dùng để xóa phần tử khỏi mảng
-            session()->put('cart', $cart); // Lưu lại giỏ hàng mới
+            return redirect('/')->with('status', 'Đăng ký tài khoản thành công!');
         }
+    public function deleteCart($id)
+        {
+            $cart = session()->get('cart');
 
-        return redirect()->back()->with('success', 'Đã xóa sản phẩm thành công!');
-    }
+            // Kiểm tra xem sản phẩm có trong giỏ không thì mới xóa
+            if (isset($cart[$id])) {
+                unset($cart[$id]); // Hàm unset dùng để xóa phần tử khỏi mảng
+                session()->put('cart', $cart); // Lưu lại giỏ hàng mới
+            }
+
+            return redirect()->back()->with('success', 'Đã xóa sản phẩm thành công!');
+        }
     public function updateQuantity($id, $type)
     {
         // 1. Lấy giỏ hàng hiện tại từ session
@@ -213,15 +225,26 @@ class WebController extends Controller
                 if ($cart[$id]['quantity'] > 1) {
                     $cart[$id]['quantity']--;
                 }
+                session()->put('cart', $cart);
             }
 
             // 3. Lưu lại giỏ hàng mới vào session
             session()->put('cart', $cart);
         }
 
-        // 4. Quay lại trang giỏ hàng với thông báo
-        return redirect()->back()->with('success', 'Cập nhật số lượng thành công!');
-    }
+            // Tính toán lại tổng tiền để gửi về cho giao diện
+            $total = 0;
+            foreach($cart as $item) {
+                $total += $item['price'] * $item['quantity'];
+            }
+
+            return response()->json([
+                'status'   => 'success',
+                'quantity' => $cart[$id]['quantity'],
+                'subtotal' => number_format($cart[$id]['price'] * $cart[$id]['quantity']) . 'đ',
+                'total'    => number_format($total) . 'đ'
+            ]);
+        }
     public function checkout()
     {
         return view('user.checkout'); // Tạo file checkout.blade.php trống để hết lỗi
@@ -332,4 +355,51 @@ class WebController extends Controller
     }
 
 };
+    public function sendContact(Request $request) 
+        {
+            // 1. Kiểm tra dữ liệu
+            $request->validate([
+                'name'    => 'required',
+                'email'   => 'required|email',
+                'phone'   => 'required',
+                'title'   => 'required',
+                'content' => 'required',
+                ]);
+
+                // 2. Thực hiện lưu vào DB
+                \App\Models\Contact::create($request->all());
+
+                // 3. ĐÂY LÀ DÒNG GÂY LỖI NẾU VIẾT SAI:
+                // SAI: return view('viewContact');  <-- Laravel sẽ đi tìm file viewContact.blade.php
+                // ĐÚNG: Quay về trang chủ
+                return redirect('/')->with('success', 'Gửi liên hệ thành công!');
+         }
+
+    public function show($id)
+        {
+            // Lấy thông tin sản phẩm và danh mục (Mục 10)
+            $product = \App\Models\Product::with('category')->findOrFail($id);
+
+            // Tăng lượt xem (Mục 17)
+            $product->increment('views');
+
+            // Lấy sản phẩm liên quan (Mục 13)
+            $relatedProducts = \App\Models\Product::where('category_id', $product->category_id)
+                ->where('id', '!=', $product->id)
+                ->limit(4)
+                ->get();
+
+            return view('user.single-product', compact('product', 'relatedProducts'));
+        }
+
+    public function getStockQuantity($id) 
+        {
+            $stock = DB::table('products')->where('id', $id)->value('stock_quantity');
+            return response()->json(['stock' => $stock ?? 0]);
+        }
+                    
+
+       
+}
+;
 

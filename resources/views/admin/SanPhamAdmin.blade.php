@@ -24,21 +24,17 @@
             </form>
         </div>
 
-        <div style="overflow-x: auto; background: white; border-radius: 8px;">
-            <table class="product-table">
+        <div style="overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+            <table class="product-table" style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
+                    <tr style="background: #f8f9fc;">
                         <th>ID</th>
                         <th>Tên Sản Phẩm</th>
                         <th>Giá Gốc</th>
-                        <th>Giá Giảm</th>
-                        <th>Mô tả</th>
-                        <th>Hình ảnh</th>
+                        <th>Kho (Mục 11)</th> <th>Xem (Mục 17)</th> <th>Hình ảnh</th>
                         <th>Loại SP</th>
                         <th>Phân loại</th>
-                        <th>Tag</th>
                         <th>Trạng thái</th>
-                        <th>Thương hiệu</th>
                         <th>Hành động</th>
                     </tr>
                 </thead>
@@ -47,32 +43,41 @@
                     @foreach ($sanpham as $sp)
                         <tr>
                             <td>{{ ($sanpham->currentPage() - 1) * $sanpham->perPage() + $loop->iteration }}</td>
-                            <td class="name-cell">{{ $sp->name }}</td>
+                            <td class="name-cell"><strong>{{ $sp->name }}</strong></td>
                             <td class="price-text">{{ number_format($sp->price, 0, ',', '.') }}đ</td>
-                            <td class="discount-text">{{ number_format($sp->discount_price, 0, ',', '.') }}đ</td>
+                            
                             <td>
-                                <div class="description-cell" title="{{ $sp->description }}">
-                                    {{ $sp->description }}
-                                </div>
+                                @if($sp->stock_quantity <= 5)
+                                    <span class="badge" style="background: #e74a3b; color: white; padding: 5px 10px;">{{ $sp->stock_quantity }} (Sắp hết)</span>
+                                @else
+                                    <span class="badge" style="background: #1cc88a; color: white; padding: 5px 10px;">{{ $sp->stock_quantity }}</span>
+                                @endif
                             </td>
+
+                            <td>
+                                <span style="color: #4e73df;"><i class="fas fa-eye"></i> {{ number_format($sp->views) }}</span>
+                            </td>
+
                             <td>
                                 @if($sp->image)
-                                    <img src="{{ asset('uploads/'.$sp->image) }}" class="img-admin">
+                                    <img src="{{ asset('storage/'.$sp->image) }}" class="img-admin" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
                                 @else
                                     <small style="color: #ccc;">No image</small>
                                 @endif
                             </td>
-                            <td><span class="badge" style="background: #333; padding: 3px 8px; border-radius: 10px;">ID: {{ $sp->category_id }}</span></td>
+                            <td>
+                                <span class="badge" style="background: #333; color: white; padding: 4px 10px; border-radius: 10px;">
+                                    {{ $sp->category_name ?? 'Chưa phân loại' }}
+                                </span>
+                            </td>
                             <td>{{ $sp->loai == 1 ? '🔥 Bán chạy' : '✨ Mới' }}</td>
-                            <td><small class="text-muted">{{ $sp->tags }}</small></td>
                             <td>
                                 @if($sp->status == 1)
-                                    <span style="color: #1cc88a; font-weight: bold;">● Hiển thị</span>
+                                    <span style="color: #1cc88a; font-weight: bold;">● Hiện</span>
                                 @else
                                     <span style="color: #e74a3b; font-weight: bold;">● Ẩn</span>
                                 @endif
                             </td>
-                            <td>{{ $sp->brand_id }}</td>
                             <td>
                                 <div style="display: flex; gap: 8px; justify-content: center;">
                                     <a href="{{ route('admin.edit-product', $sp->id) }}" class="btn-edit" style="color: #4e73df;" title="Sửa">
