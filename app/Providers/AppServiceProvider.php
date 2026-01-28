@@ -6,7 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\DB;     // Thêm dòng này để dùng DB
 use Illuminate\Support\Facades\View;   // Thêm dòng này để dùng View::share
 use Illuminate\Support\Facades\Schema; // Thêm dòng này để dùng Schema::hasTable
-use Illuminate\Pagination\Paginator;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -28,6 +28,5 @@ class AppServiceProvider extends ServiceProvider
                 $socials = DB::table('settings')->pluck('value', 'key');
                 View::share('socials', $socials);
             }
-            Paginator::useBootstrap();
         }
 }
