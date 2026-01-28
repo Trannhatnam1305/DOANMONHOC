@@ -130,7 +130,7 @@
             <div class="col-md-4">
                 <div class="single-product-widget">
                     <h2 class="product-wid-title">Top New</h2>
-                    <a href="/blog" class="wid-view-more">View All</a>
+                    <a href="/shop" class="wid-view-more">View All</a>
 
                     @foreach ($products_top_new as $product_top_new)
                         <div class="single-wid-product">

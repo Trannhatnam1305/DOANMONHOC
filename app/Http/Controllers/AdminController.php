@@ -52,40 +52,39 @@ class AdminController extends Controller
     }
 
     public function login(Request $request)
-    {
-        // 1. Validate
-        $credentials = $request->validate([
-            'username' => 'required',
-            'password' => 'required'
-        ]);
+        {
+            // 1. Validate
+            $credentials = $request->validate([
+                'username' => 'required',
+                'password' => 'required'
+            ]);
 
-        // 2. Thử đăng nhập
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
+            // 2. Thử đăng nhập
+            if (Auth::attempt($credentials)) {
+                $user = Auth::user();
 
-            // Kiểm tra quyền và trạng thái cùng lúc
-            if ($user->status == 0 || $user->role < 1) {
-                $message = ($user->status == 0)
-                    ? 'Tài khoản quản trị của bạn đã bị khóa!'
-                    : 'Tài khoản của bạn không có quyền quản trị!';
+                // Kiểm tra quyền và trạng thái cùng lúc
+                if ($user->status == 0 || $user->role < 1) {
+                    $message = ($user->status == 0) 
+                                ? 'Tài khoản quản trị của bạn đã bị khóa!' 
+                                : 'Tài khoản của bạn không có quyền quản trị!';
 
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
 
-                return redirect()->route('admin.login')->with('error', $message);
+                    return redirect()->route('admin.login')->with('error', $message);
+                }
+
+                $request->session()->regenerate();
+                return redirect()->route('admin.index')->with('status', 'Chào mừng Admin quay trở lại!');
             }
 
-            $request->session()->regenerate();
-            return redirect()->route('admin.index')->with('status', 'Chào mừng Admin quay trở lại!');
+            // 3. Sai thông tin
+            return back()->withErrors([
+                'username' => 'Thông tin đăng nhập không chính xác.',
+            ])->withInput($request->only('username')); // Giữ lại tên đăng nhập để user không phải nhập lại
         }
-
-        // 3. Sai thông tin
-        return back()->withErrors([
-            'username' => 'Thông tin đăng nhập không chính xác.',
-        ])->withInput($request->only('username')); // Giữ lại tên đăng nhập để user không phải nhập lại
-    }
-
     public function SanPham(Request $request)
         {
             $query = DB::table('products')
@@ -376,52 +375,49 @@ class AdminController extends Controller
         }
     // Thêm hàm này vào nếu chưa có
     public function NhaCungCap()
-    {
+        {
         $dsNhacungcap = DB::table('suppliers')->get();
-        return view('admin.NhaCungCapAdmin', compact('dsNhacungcap'));
-    }
-    public function ThemNhaCungCap()
-    {
-        return view('admin.addNhaCungCap'); // Tên file blade của bạn
-    }
+            return view('admin.NhaCungCapAdmin', compact('dsNhacungcap'));
+        }
+    public function ThemNhaCungCap() {
+    return view('admin.addNhaCungCap'); // Tên file blade của bạn
+}
     public function LuuNhaCungCap(Request $request)
-    {
-        // 1. Kiểm tra dữ liệu (Validate) bằng tiếng Việt
-        $request->validate([
-            'name' => 'required|max:255',
-            'phone' => 'required|numeric',
-            'email' => 'required|email|unique:suppliers,email',
-            'contact_person' => 'nullable|max:255',
-        ], [
-            'name.required' => 'Vui lòng nhập tên công ty.',
-            'phone.required' => 'Vui lòng nhập số điện thoại.',
-            'phone.numeric' => 'Số điện thoại phải là định dạng số.',
-            'email.required' => 'Vui lòng nhập địa chỉ email.',
-            'email.email' => 'Email không đúng định dạng.',
-            'email.unique' => 'Email nhà cung cấp này đã tồn tại trong hệ thống!',
-        ]);
+            {
+                // 1. Kiểm tra dữ liệu (Validate) bằng tiếng Việt
+                $request->validate([
+                    'name'           => 'required|max:255',
+                    'phone'          => 'required|numeric',
+                    'email'          => 'required|email|unique:suppliers,email',
+                    'contact_person' => 'nullable|max:255',
+                ], [
+                    'name.required'  => 'Vui lòng nhập tên công ty.',
+                    'phone.required' => 'Vui lòng nhập số điện thoại.',
+                    'phone.numeric'  => 'Số điện thoại phải là định dạng số.',
+                    'email.required' => 'Vui lòng nhập địa chỉ email.',
+                    'email.email'    => 'Email không đúng định dạng.',
+                    'email.unique'   => 'Email nhà cung cấp này đã tồn tại trong hệ thống!',
+                ]);
 
-        // 2. Lưu vào Database
-        DB::table('suppliers')->insert([
-            'name' => $request->name,
-            'contact_person' => $request->contact_person,
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+                // 2. Lưu vào Database
+                DB::table('suppliers')->insert([
+                    'name'           => $request->name,
+                    'contact_person' => $request->contact_person,
+                    'phone'          => $request->phone,
+                    'email'          => $request->email,
+                    'created_at'     => now(),
+                    'updated_at'     => now(),
+                ]);
 
-        // 3. Quay lại trang danh sách và thông báo
-        return redirect()->route('admin.nhacungcap')->with('success', 'Đã thêm nhà cung cấp thành công!');
-    }
+                // 3. Quay lại trang danh sách và thông báo
+                return redirect()->route('admin.nhacungcap')->with('success', 'Đã thêm nhà cung cấp thành công!');
+            }
 
-    public function ThemLoaiSanPham()
-    {
-        return view('admin.addLoaiSanPham');
-    }
+        public function ThemLoaiSanPham() {
+    return view('admin.addLoaiSanPham');
+}
 
-    public function LuuLoaiSanPham(Request $request)
-    {
+    public function LuuLoaiSanPham(Request $request) {
         // Validate dữ liệu
         $request->validate([
             'name' => 'required|unique:categories,name|max:255',
@@ -444,43 +440,43 @@ class AdminController extends Controller
     }
 
     public function editSocials()
-    {
-        $socials = DB::table('settings')->pluck('value', 'key');
-        return view('admin.socials', compact('socials'));
-    }
+        {
+            $socials = DB::table('settings')->pluck('value', 'key');
+            return view('admin.socials', compact('socials'));
+        }
 
     public function updateSocials(Request $request)
-    {
-        $platforms = ['facebook', 'twitter', 'youtube', 'linkedin', 'pinterest'];
-        foreach ($platforms as $platform) {
-            DB::table('settings')->updateOrInsert(
-                ['key' => $platform],
-                ['value' => $request->input($platform)]
-            );
+        {
+            $platforms = ['facebook', 'twitter', 'youtube', 'linkedin', 'pinterest'];
+            foreach ($platforms as $platform) {
+                DB::table('settings')->updateOrInsert(
+                    ['key' => $platform],
+                    ['value' => $request->input($platform)]
+                );
+            }
+            return redirect()->back()->with('success', 'Đã cập nhật link thành công!');
         }
-        return redirect()->back()->with('success', 'Đã cập nhật link thành công!');
-    }
     public function listContacts()
-    {
-        $contacts = \App\Models\Contact::orderBy('created_at', 'desc')->paginate(10);
-
-        // Thử dùng cách truyền mảng này cho chắc chắn
-        return view('admin.contact', [
-            'contacts' => $contacts
-        ]);
-    }
+        {
+            $contacts = \App\Models\Contact::orderBy('created_at', 'desc')->paginate(10);
+            
+            // Thử dùng cách truyền mảng này cho chắc chắn
+            return view('admin.contact', [
+                'contacts' => $contacts
+            ]);
+        }
 
     public function markAsRead($id)
-    {
-        // Tìm tin nhắn theo ID
-        $contact = \App\Models\Contact::findOrFail($id);
-
-        // Cập nhật trạng thái thành đã xem
-        $contact->update(['status' => 1]);
-
-        // Quay lại trang danh sách kèm thông báo
-        return back()->with('success', 'Đã đánh dấu tin nhắn là đã đọc.');
-    }
+        {
+            // Tìm tin nhắn theo ID
+            $contact = \App\Models\Contact::findOrFail($id);
+            
+            // Cập nhật trạng thái thành đã xem
+            $contact->update(['status' => 1]);
+            
+            // Quay lại trang danh sách kèm thông báo
+            return back()->with('success', 'Đã đánh dấu tin nhắn là đã đọc.');
+        }
 }
 
 
